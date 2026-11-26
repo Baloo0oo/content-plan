@@ -124,6 +124,7 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 .slides{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 0}
 .slides a{flex:none;scroll-snap-align:start}
 .slides img{width:190px;height:238px;object-fit:cover;border-radius:10px;display:block;background:#0a0b0d}
+.slides.bg img{width:135px;height:240px}
 #setup{max-width:560px;background:var(--card);border-radius:16px;padding:18px;margin-top:14px}
 #setup h2{margin:0 0 6px;font-size:22px}
 .side{display:none}
@@ -295,11 +296,13 @@ const filmsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot==='FILM'
 const byId=id=>data.posts.find(p=>p.id===id);
 function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
 function kv(k,v){return v?`<div><p class="k">${esc(k)}</p><p>${v}</p></div>`:''}
+function bgBlock(bg){if(!bg||!bg.n)return '';return `<div><p class="k">Green-screen backgrounds (${bg.n})</p><div class="slides bg" data-bg="${esc(bg.key)}" data-n="${bg.n}"></div><button class="big" type="button" data-savebg="${esc(bg.key)}|${bg.n}" style="margin-top:6px">Save all backgrounds</button><p class="mut"></p></div>`}
 function extra(p){if(!p)return '';let h='';
  if(p.onscreen)h+=`<div><p class="k">On screen (one card per line)</p><pre dir="rtl">${esc(p.onscreen.split(' | ').join('\n'))}</pre></div>`;
  if(p.shows)h+=kv('What the video shows',esc(p.shows));
  if(p.source_screen)h+=`<div><p class="k">Source on screen</p><pre dir="rtl">${esc(p.source_screen.split(' | ').join('\n'))}</pre></div>`;
  if(p.source_caption)h+=kv('Source for the caption',esc(p.source_caption));
+ h+=bgBlock(p.bg);
  return h}
 function postCard(p){
  const car=p.carousel?(data.carousels||[]).find(c=>c.id===p.carousel):null;
@@ -379,6 +382,7 @@ function render(){
  const r=(data.reddit||{})[cur];
  $('redditbox').innerHTML=r?`<div class="reddit"><h3>Reddit this week: ${esc(r.topic)}</h3><p class="mut">${esc(r.sub)} · ${esc(r.comments)} comments${safeUrl(r.url)?` · <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">open the post</a>`:''}</p><p>${esc(r.angle)}</p>${r.backup?`<p class="mut">Backup: ${esc(r.backup)}</p>`:''}</div>`:'';
  renderCars();renderStats();renderOwners();
+ document.querySelectorAll('.slides[data-bg]').forEach(box=>{const d=box.closest('details');if(d&&d.open)loadBg(box)});
  document.querySelectorAll('.slides[data-car]').forEach(box=>{const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);const d=box.closest('details');if(c&&d&&d.open)loadSlides(c,box)});
 }
 function renderOwners(){
@@ -389,7 +393,7 @@ function renderOwners(){
    +`<div><p class="k">On screen</p><pre dir="rtl">${esc((r.onscreen||'').split(' | ').join('\n'))}</pre><button class="copy" type="button" data-copyo="${r.n}|onscreen">Copy on-screen text</button></div>`
    +kv('Shows',esc(r.shows))+(r.source_screen?kv('Source on screen',`<span dir="rtl">${esc(r.source_screen)}</span>`):'')
    +(r.source_caption?`<div><p class="k">Source for the caption</p><p>${esc(r.source_caption)}</p><button class="copy" type="button" data-copyo="${r.n}|source_caption">Copy source</button></div>`:'')
-   +kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
+   +bgBlock(r.bg)+kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
   return `<div class="card ${pp&&pp.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${r.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(r.time)}</span>${st?`<span class="tag" style="--c:${st==='Posted ✓'?'var(--ok)':'#5f6672'}">${esc(st)}</span>`:''}</div><h3>${esc(r.title)}</h3>${det('o:'+r.n,'Script and details',inner)}</div>`}).join(''):'<p class="mut">No owner scripts.</p>';
 }
 function renderStats(){
@@ -407,6 +411,14 @@ function renderCars(){
 <div><p class="k">Want changes?</p><textarea class="inp" id="chg-${esc(c.id)}" maxlength="800" placeholder="e.g. make slide 3 simpler, change the cover"></textarea><button class="big" type="button" data-chg="${esc(c.id)}" style="margin-top:8px">Send changes</button></div>`}
   return `<div class="car"><p style="margin:0;font-weight:700">${esc(c.topic)}</p><p class="cst ${esc(st)}" style="margin:2px 0 0">${esc(lab[st]||st)}${esc(when)}${c.changes?' · changes requested':''}${c.error?' · '+esc(c.error):''}</p>${inner?det('c:'+c.id,'Open slides',inner):''}</div>`}).join(''):'<p class="mut">No carousels yet.</p>';
 }
+async function loadBg(box){
+ if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading backgrounds…';
+ const key=box.dataset.bg,n=+box.dataset.n,out=[];
+ for(let i=1;i<=n;i++){const k='bg:'+key+'/'+i;
+  if(!imgs[k]){try{const r=await fetch(API+'backgrounds/'+encodeURIComponent(key)+'/bg-'+i+'.png',{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;const bl=await r.blob();blobs[k]=bl;imgs[k]=URL.createObjectURL(bl)}catch(e){box.textContent='Could not load the backgrounds. Close and open again.';delete box.dataset.done;return}}
+  out.push(`<a href="${imgs[k]}" download="${esc(key)}-bg-${i}.png"><img src="${imgs[k]}" alt="Background ${i}"></a>`)}
+ box.innerHTML=out.join('');
+}
 async function loadSlides(c,box){
  if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading slides…';
  const out=[];
@@ -414,6 +426,12 @@ async function loadSlides(c,box){
   if(!imgs[k]){try{const r=await fetch(API+'carousels/'+encodeURIComponent(c.id)+'/slide-'+i+'.png',{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;const bl=await r.blob();blobs[k]=bl;imgs[k]=URL.createObjectURL(bl)}catch(e){box.textContent='Could not load the slides. Close and open again.';delete box.dataset.done;return}}
   out.push(`<a href="${imgs[k]}" download="${esc(c.id)}-${i}.png"><img src="${imgs[k]}" alt="Slide ${i}"></a>`)}
  box.innerHTML=out.join('');
+}
+function shareOrZip(files,name,note){
+ const say=m=>{if(note)note.textContent=m};
+ if(navigator.canShare&&navigator.canShare({files})){navigator.share({files}).then(()=>say('Done.')).catch(err=>{if(err&&err.name!=='AbortError')say('Could not open the share sheet. Try again.')});say('Choose "Save Images" to put all '+files.length+' in Photos, in order.');return}
+ if(!window.JSZip){say('Preparing the download… tap again in a second.');const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';document.head.appendChild(s);return}
+ const z=new JSZip();files.forEach(f=>z.file(f.name,f));z.generateAsync({type:'blob'}).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name+'.zip';document.body.appendChild(a);a.click();a.remove();say('Downloaded '+name+'.zip')});
 }
 function saveAll(btn){
  const c=(data.carousels||[]).find(x=>x.id===btn.dataset.saveall);if(!c)return;
@@ -434,13 +452,14 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab
 $('strip').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;sel=+b.dataset.d;render()});
 for(const [id,n] of [['prevwk',-1],['nextwk',1],['prevwk2',-1],['nextwk2',1]])$(id).addEventListener('click',()=>stepWeek(n));
 document.addEventListener('toggle',e=>{const d=e.target;if(!(d.matches&&d.matches('details[data-k]')))return;if(d.open)openSet.add(d.dataset.k);else openSet.delete(d.dataset.k);
- if(d.open){const box=d.querySelector('.slides[data-car]');if(box){const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);if(c)loadSlides(c,box)}}},true);
+ if(d.open){d.querySelectorAll('.slides[data-bg]').forEach(loadBg);const box=d.querySelector('.slides[data-car]');if(box){const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);if(c)loadSlides(c,box)}}},true);
 document.addEventListener('click',async e=>{
  const go=e.target.closest('[data-go]');if(go){cur=go.dataset.w;sel=+go.dataset.go;setTab('today');return}
  const s=e.target.closest('button[data-s]');if(s){const p=byId(s.dataset.id);if(p)change(p.id,{status:p.status===s.dataset.s?'':s.dataset.s});return}
  const fb=e.target.closest('button[data-frame]');if(fb){const p=byId(fb.dataset.frame);if(p){const i=+fb.dataset.i;const dn=(p.framesDone||[]).slice();const k=dn.indexOf(i);if(k>=0)dn.splice(k,1);else dn.push(i);dn.sort((a,b)=>a-b);change(p.id,{framesDone:dn,status:dn.length===(p.frames||[]).length?'done':''})}return}
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
  const sa=e.target.closest('button[data-saveall]');if(sa){saveAll(sa);return}
+ const sb=e.target.closest('button[data-savebg]');if(sb){const [key,n]=sb.dataset.savebg.split('|');const files=[];for(let i=1;i<=+n;i++){const b=blobs['bg:'+key+'/'+i];if(!b){sb.nextElementSibling.textContent='Wait until all the backgrounds have loaded, then tap again.';return}files.push(new File([b],`${key}-bg-${String(i).padStart(2,'0')}.png`,{type:'image/png'}))}shareOrZip(files,key+'-backgrounds',sb.nextElementSibling);return}
  const ca=e.target.closest('button[data-copya]');if(ca){const c=(data.carousels||[]).find(x=>x.id===ca.dataset.copya);try{await navigator.clipboard.writeText((c&&c.alt)||'');ca.textContent='Copied ✓'}catch(err){ca.textContent='Copy failed'}return}
  const co=e.target.closest('button[data-copyo]');if(co){const [n,f]=co.dataset.copyo.split('|');const r=(data.ownerScripts||[]).find(x=>String(x.n)===n);let txt=r?r[f]||'':'';if(f==='onscreen')txt=txt.split(' | ').join('\n');try{await navigator.clipboard.writeText(txt);co.textContent='Copied ✓'}catch(err){co.textContent='Copy failed: select the text instead'}return}
  const ct=e.target.closest('button[data-copyt]');if(ct){const [sid,i]=ct.dataset.copyt.split('|');const s=byId(sid);const f=s&&s.frames?s.frames[+i]:null;try{await navigator.clipboard.writeText((f&&f.text)||'');ct.textContent='Copied ✓'}catch(err){ct.textContent='Copy failed: select the text instead'}return}
