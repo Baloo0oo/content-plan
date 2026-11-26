@@ -225,7 +225,7 @@ const enc=str=>{const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.l
 let key=ls.get('ghkey'),data={posts:[],reddit:{},carousels:[]},cur=null,sel=0,tab='today';
 let pending={};try{pending=JSON.parse(ls.get('pending')||'{}')}catch(e){pending={}}
 let saving=false,retryT=null,flushT=null;
-const openSet=new Set(),imgs={};
+const openSet=new Set(),imgs={},blobs={};
 const savePending=()=>ls.set('pending',JSON.stringify(pending));
 const dayDate=(wk,d)=>{const x=new Date(wk+'T12:00:00');x.setDate(x.getDate()+d);return x};
 const fmt=x=>x.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
@@ -294,7 +294,7 @@ function postCard(p){
  const r=p.slot==='REDDIT'?(data.reddit||{})[p.week]:null;
  let inner=kv('What',esc(EFF[p.slot]||''))+kv('Notes',esc(p.note||''));
  if(r){const u=safeUrl(r.url);inner+=kv('Reddit post',`${esc(r.topic)} · ${esc(r.sub)} · ${esc(r.comments)} comments${u?` · <a href="${esc(u)}" target="_blank" rel="noopener">open</a>`:''}`)+kv('Angle',esc(r.angle||''))}
- if(car&&car.status==='ready')inner+=`<div><p class="k">Slides</p><div class="slides" id="ps-${esc(p.id)}" data-car="${esc(car.id)}"></div><p class="mut">Tap a slide to download it, or press and hold to save it to your photos.</p></div>`;
+ if(car&&car.status==='ready')inner+=`<div><p class="k">Slides</p><div class="slides" id="ps-${esc(p.id)}" data-car="${esc(car.id)}"></div><p class="mut">Save all at once, or press and hold one slide to save just that one.</p><button class="big" type="button" data-saveall="${esc(car.id)}" style="margin-top:6px">Save all slides</button><p class="mut" id="sa-${esc(car.id)}-p"></p></div>`;
  if(p.script)inner+=`<div><p class="k">${p.slot==='CAROUSEL'?'Caption':'Script'}</p><pre dir="rtl">${esc(p.script)}</pre><button class="copy" type="button" data-copyp="${esc(p.id)}">Copy</button></div>`;
  if(p.status==='missed'||p.status==='moved')inner+=`<div><p class="k">Why?</p><input class="inp" id="why-${esc(p.id)}" data-id="${esc(p.id)}" data-f="why" placeholder="Optional" value="${esc(p.why||'')}"></div>`;
  if(p.status==='done')inner+=`<div><p class="k">Views</p><input class="inp" id="views-${esc(p.id)}" data-id="${esc(p.id)}" data-f="views" inputmode="numeric" placeholder="Add later" value="${esc(p.views||'')}"></div>`;
@@ -380,7 +380,7 @@ function renderCars(){
  const lab={queued:'In the queue: made within the hour while your computer is on',making:'Being made now…',ready:'Ready',failed:'Could not be made'};
  $('carlist').innerHTML=list.length?list.map(c=>{const st=c.status||'queued';const when=c.date?` · posts ${fmt(new Date(c.date+'T12:00:00'))}, 6 PM`:'';
   let inner='';
-  if(st==='ready'){inner=`<div class="slides" id="cs-${esc(c.id)}" data-car="${esc(c.id)}"></div><p class="mut">Tap a slide to download it, or press and hold to save it to your photos.</p>${c.caption?`<div><p class="k">Caption</p><pre dir="rtl">${esc(c.caption)}</pre><button class="copy" type="button" data-copyc="${esc(c.id)}">Copy caption</button></div>`:''}
+  if(st==='ready'){inner=`<div class="slides" id="cs-${esc(c.id)}" data-car="${esc(c.id)}"></div><p class="mut">Save all at once, or press and hold one slide to save just that one.</p><button class="big" type="button" data-saveall="${esc(c.id)}" style="margin-top:6px">Save all slides</button><p class="mut" id="sa-${esc(c.id)}-c"></p>${c.caption?`<div><p class="k">Caption</p><pre dir="rtl">${esc(c.caption)}</pre><button class="copy" type="button" data-copyc="${esc(c.id)}">Copy caption</button></div>`:''}
 <div><p class="k">Want changes?</p><textarea class="inp" id="chg-${esc(c.id)}" maxlength="800" placeholder="e.g. make slide 3 simpler, change the cover"></textarea><button class="big" type="button" data-chg="${esc(c.id)}" style="margin-top:8px">Send changes</button></div>`}
   return `<div class="car"><p style="margin:0;font-weight:700">${esc(c.topic)}</p><p class="cst ${esc(st)}" style="margin:2px 0 0">${esc(lab[st]||st)}${esc(when)}${c.changes?' · changes requested':''}${c.error?' · '+esc(c.error):''}</p>${inner?det('c:'+c.id,'Open slides',inner):''}</div>`}).join(''):'<p class="mut">No carousels yet.</p>';
 }
@@ -388,9 +388,22 @@ async function loadSlides(c,box){
  if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading slides…';
  const out=[];
  for(let i=1;i<=(c.slides||0);i++){const k=c.id+'/'+i;
-  if(!imgs[k]){try{const r=await fetch(API+'carousels/'+encodeURIComponent(c.id)+'/slide-'+i+'.png',{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;imgs[k]=URL.createObjectURL(await r.blob())}catch(e){box.textContent='Could not load the slides. Close and open again.';delete box.dataset.done;return}}
+  if(!imgs[k]){try{const r=await fetch(API+'carousels/'+encodeURIComponent(c.id)+'/slide-'+i+'.png',{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;const bl=await r.blob();blobs[k]=bl;imgs[k]=URL.createObjectURL(bl)}catch(e){box.textContent='Could not load the slides. Close and open again.';delete box.dataset.done;return}}
   out.push(`<a href="${imgs[k]}" download="${esc(c.id)}-${i}.png"><img src="${imgs[k]}" alt="Slide ${i}"></a>`)}
  box.innerHTML=out.join('');
+}
+function saveAll(btn){
+ const c=(data.carousels||[]).find(x=>x.id===btn.dataset.saveall);if(!c)return;
+ const note=btn.nextElementSibling;const say=m=>{if(note)note.textContent=m};
+ const files=[];
+ for(let i=1;i<=(c.slides||0);i++){const b=blobs[c.id+'/'+i];if(!b){say('Wait until all the slides have loaded above, then tap again.');return}
+  files.push(new File([b],`${c.id}-${String(i).padStart(2,'0')}.png`,{type:'image/png'}))}
+ if(navigator.canShare&&navigator.canShare({files})){
+  navigator.share({files}).then(()=>say('Done. On iPhone, choose "Save Images" in the share sheet to put them all in Photos.')).catch(err=>{if(err&&err.name!=='AbortError')say('Could not open the share sheet. Try again.')});
+  say('Choose "Save Images" to put all '+files.length+' slides in Photos, in order.');return}
+ if(!window.JSZip){say('Preparing the download… tap again in a second.');const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';document.head.appendChild(s);return}
+ const z=new JSZip();files.forEach(f=>z.file(f.name,f));
+ z.generateAsync({type:'blob'}).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=c.id+'-slides.zip';document.body.appendChild(a);a.click();a.remove();say('Downloaded '+c.id+'-slides.zip with all '+files.length+' slides.')});
 }
 function setTab(t){tab=t;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-'+t);render();window.scrollTo(0,0)}
 function stepWeek(n){const ws=weeks(),i=ws.indexOf(cur)+n;if(i<0||i>=ws.length)return;cur=ws[i];sel=isToday(cur,todayIdx())?todayIdx():0;render()}
@@ -404,6 +417,7 @@ document.addEventListener('click',async e=>{
  const s=e.target.closest('button[data-s]');if(s){const p=byId(s.dataset.id);if(p)change(p.id,{status:p.status===s.dataset.s?'':s.dataset.s});return}
  const fb=e.target.closest('button[data-frame]');if(fb){const p=byId(fb.dataset.frame);if(p){const i=+fb.dataset.i;const dn=(p.framesDone||[]).slice();const k=dn.indexOf(i);if(k>=0)dn.splice(k,1);else dn.push(i);dn.sort((a,b)=>a-b);change(p.id,{framesDone:dn,status:dn.length===(p.frames||[]).length?'done':''})}return}
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
+ const sa=e.target.closest('button[data-saveall]');if(sa){saveAll(sa);return}
  const ct=e.target.closest('button[data-copyt]');if(ct){const [sid,i]=ct.dataset.copyt.split('|');const s=byId(sid);const f=s&&s.frames?s.frames[+i]:null;try{await navigator.clipboard.writeText((f&&f.text)||'');ct.textContent='Copied ✓'}catch(err){ct.textContent='Copy failed: select the text instead'}return}
  const cp=e.target.closest('button[data-copyp],button[data-copyc]');if(cp){const txt=cp.dataset.copyp?(byId(cp.dataset.copyp)||{}).script:((data.carousels||[]).find(c=>c.id===cp.dataset.copyc)||{}).caption;try{await navigator.clipboard.writeText(txt||'');cp.textContent='Copied ✓'}catch(err){cp.textContent='Copy failed: select the text instead'}return}
  const ch=e.target.closest('button[data-chg]');if(ch){const id=ch.dataset.chg;const txt=($('chg-'+id).value||'').trim();if(!txt)return;ch.disabled=true;ch.textContent='Sending…';
