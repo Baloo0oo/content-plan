@@ -296,7 +296,7 @@ const filmsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot==='FILM'
 const byId=id=>data.posts.find(p=>p.id===id);
 function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
 function kv(k,v){return v?`<div><p class="k">${esc(k)}</p><p>${v}</p></div>`:''}
-function bgBlock(bg){if(!bg||!bg.n)return '';return `<div><p class="k">Green-screen backgrounds (${bg.n})</p><div class="slides bg" data-bg="${esc(bg.key)}" data-n="${bg.n}"></div><button class="big" type="button" data-savebg="${esc(bg.key)}|${bg.n}" style="margin-top:6px">Save all backgrounds</button><p class="mut"></p></div>`}
+function bgBlock(bg){if(!bg||!bg.n)return '';return `<div><p class="k">Green-screen backgrounds (${bg.n})</p><div class="slides bg" data-bg="${esc(bg.key)}" data-n="${bg.n}" data-ext="${esc(bg.ext||'png')}"></div><button class="big" type="button" data-savebg="${esc(bg.key)}|${bg.n}|${esc(bg.ext||'png')}" style="margin-top:6px">Save all backgrounds</button><p class="mut"></p>${(bg.credits||[]).length?`<p class="mut" style="font-size:12px">${bg.credits.map(c=>esc(c)).join('<br>')}</p>`:''}</div>`}
 function extra(p){if(!p)return '';let h='';
  if(p.onscreen)h+=`<div><p class="k">On screen (one card per line)</p><pre dir="rtl">${esc(p.onscreen.split(' | ').join('\n'))}</pre></div>`;
  if(p.shows)h+=kv('What the video shows',esc(p.shows));
@@ -415,8 +415,8 @@ async function loadBg(box){
  if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading backgrounds…';
  const key=box.dataset.bg,n=+box.dataset.n,out=[];
  for(let i=1;i<=n;i++){const k='bg:'+key+'/'+i;
-  if(!imgs[k]){try{const r=await fetch(API+'backgrounds/'+encodeURIComponent(key)+'/bg-'+i+'.png',{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;const bl=await r.blob();blobs[k]=bl;imgs[k]=URL.createObjectURL(bl)}catch(e){box.textContent='Could not load the backgrounds. Close and open again.';delete box.dataset.done;return}}
-  out.push(`<a href="${imgs[k]}" download="${esc(key)}-bg-${i}.png"><img src="${imgs[k]}" alt="Background ${i}"></a>`)}
+  if(!imgs[k]){try{const r=await fetch(API+'backgrounds/'+encodeURIComponent(key)+'/bg-'+i+'.'+(box.dataset.ext||'png'),{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;const bl=await r.blob();blobs[k]=bl;imgs[k]=URL.createObjectURL(bl)}catch(e){box.textContent='Could not load the backgrounds. Close and open again.';delete box.dataset.done;return}}
+  out.push(`<a href="${imgs[k]}" download="${esc(key)}-bg-${i}.${esc(box.dataset.ext||'png')}"><img src="${imgs[k]}" alt="Background ${i}"></a>`)}
  box.innerHTML=out.join('');
 }
 async function loadSlides(c,box){
@@ -459,7 +459,7 @@ document.addEventListener('click',async e=>{
  const fb=e.target.closest('button[data-frame]');if(fb){const p=byId(fb.dataset.frame);if(p){const i=+fb.dataset.i;const dn=(p.framesDone||[]).slice();const k=dn.indexOf(i);if(k>=0)dn.splice(k,1);else dn.push(i);dn.sort((a,b)=>a-b);change(p.id,{framesDone:dn,status:dn.length===(p.frames||[]).length?'done':''})}return}
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
  const sa=e.target.closest('button[data-saveall]');if(sa){saveAll(sa);return}
- const sb=e.target.closest('button[data-savebg]');if(sb){const [key,n]=sb.dataset.savebg.split('|');const files=[];for(let i=1;i<=+n;i++){const b=blobs['bg:'+key+'/'+i];if(!b){sb.nextElementSibling.textContent='Wait until all the backgrounds have loaded, then tap again.';return}files.push(new File([b],`${key}-bg-${String(i).padStart(2,'0')}.png`,{type:'image/png'}))}shareOrZip(files,key+'-backgrounds',sb.nextElementSibling);return}
+ const sb=e.target.closest('button[data-savebg]');if(sb){const [key,n,ext0]=sb.dataset.savebg.split('|');const ext=ext0||'png';const files=[];for(let i=1;i<=+n;i++){const b=blobs['bg:'+key+'/'+i];if(!b){sb.nextElementSibling.textContent='Wait until all the backgrounds have loaded, then tap again.';return}files.push(new File([b],`${key}-bg-${String(i).padStart(2,'0')}.${ext}`,{type:ext==='png'?'image/png':'image/jpeg'}))}shareOrZip(files,key+'-backgrounds',sb.nextElementSibling);return}
  const ca=e.target.closest('button[data-copya]');if(ca){const c=(data.carousels||[]).find(x=>x.id===ca.dataset.copya);try{await navigator.clipboard.writeText((c&&c.alt)||'');ca.textContent='Copied ✓'}catch(err){ca.textContent='Copy failed'}return}
  const co=e.target.closest('button[data-copyo]');if(co){const [n,f]=co.dataset.copyo.split('|');const r=(data.ownerScripts||[]).find(x=>String(x.n)===n);let txt=r?r[f]||'':'';if(f==='onscreen')txt=txt.split(' | ').join('\n');try{await navigator.clipboard.writeText(txt);co.textContent='Copied ✓'}catch(err){co.textContent='Copy failed: select the text instead'}return}
  const ct=e.target.closest('button[data-copyt]');if(ct){const [sid,i]=ct.dataset.copyt.split('|');const s=byId(sid);const f=s&&s.frames?s.frames[+i]:null;try{await navigator.clipboard.writeText((f&&f.text)||'');ct.textContent='Copied ✓'}catch(err){ct.textContent='Copy failed: select the text instead'}return}
