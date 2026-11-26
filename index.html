@@ -22,6 +22,20 @@
 .fr:first-of-type{border-top:0}
 .fr .tick{width:44px;height:44px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:transparent;font-size:22px;cursor:pointer}
 .fr .tick[aria-checked=true]{background:var(--ok);border-color:var(--ok);color:#fff}
+
+.carsec{margin-top:22px;background:var(--panel);border-radius:14px;padding:16px}
+.carsec h2{margin:0 0 4px;font-size:22px;font-weight:800}
+#carform{display:grid;gap:10px;margin:10px 0 6px}
+#carform label{font-weight:600;font-size:15px}
+#carform textarea{font:16px/1.5 Cairo,sans-serif;min-height:88px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);width:100%}
+#carform input,#carform select{width:100%;font:16px Cairo,sans-serif;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--ink)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(11em,1fr));gap:10px}
+.car{border-top:1px solid var(--line);padding:12px 0}
+.car .st{font-size:14px;font-weight:600}
+.st.ready{color:var(--ok)}.st.failed{color:var(--red)}.st.queued,.st.making{color:#2b6cd9}
+.strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 0}
+.strip a{flex:none;scroll-snap-align:start}
+.strip img{width:200px;height:250px;object-fit:cover;border-radius:10px;display:block;background:#0a0b0d}
 .fr.done .topic{text-decoration:line-through;color:var(--mute)}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Cairo,system-ui,sans-serif;overflow-x:clip;padding-top:env(safe-area-inset-top)}
@@ -108,6 +122,24 @@ pre{white-space:pre-wrap;font:17px/1.8 Cairo,sans-serif;background:var(--panel);
 <div class="map" id="map"></div>
 <div class="score" id="score"></div>
 <div class="reddit" id="reddit"></div>
+<div class="carsec"><h2>Carousels</h2>
+<p class="note">Type a topic and Claude makes the slides in your style, then books them on the next free Thursday 6 PM. Requests are picked up every hour while your computer is on with the Claude app open.</p>
+<form id="carform">
+<label for="ctopic">Topic</label>
+<input id="ctopic" required maxlength="140" placeholder="e.g. 5 mistakes on the leg press">
+<div class="two">
+<div><label for="ctype">Type</label><select id="ctype"><option>Nutrition</option><option>Training</option><option>Coaching</option></select></div>
+<div><label for="cslides">Slides</label><select id="cslides"><option>7</option><option selected>8</option><option>9</option></select></div>
+<div><label for="cwant">Post on (optional)</label><input id="cwant" type="date"></div>
+</div>
+<label for="cnotes">Points, angle or numbers to include (optional)</label>
+<textarea id="cnotes" maxlength="1200" placeholder="Anything you want on the slides. Leave empty and Claude picks the points."></textarea>
+<label for="csource">Source to cite (optional)</label>
+<input id="csource" maxlength="200" placeholder="Study or link, if you want one cited">
+<button class="big" type="submit">Make this carousel</button>
+<p class="note" id="carmsg"></p>
+</form>
+<div id="carlist"></div></div>
 </div>
 </div></section>
 
@@ -185,6 +217,33 @@ function change(id,fields){
  Object.assign(p,fields);pending[id]={...(pending[id]||{}),...fields};savePending();render();
  status('Saving online…');clearTimeout(flushT);flushT=setTimeout(flush,700);
 }
+async function mutate(fn,msg){
+ for(let attempt=0;attempt<4;attempt++){
+  const r=await fetchData();const d=r.data;fn(d);d.updated=new Date().toISOString();
+  const put=await fetch(API,{method:'PUT',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({message:msg,content:enc(JSON.stringify(d,null,1)),sha:r.sha})});
+  if(put.ok){const j=await put.json();sha=j.content.sha;data=applyPending(d);render();return true}
+  if(put.status!==409&&put.status!==422)throw new Error('http '+put.status);
+ }
+ throw new Error('conflict');
+}
+const imgs={},openCars=new Set();
+async function loadSlides(c){
+ const box=$('strip-'+c.id);if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading slides…';
+ const out=[];
+ for(let i=1;i<=(c.slides||0);i++){
+  const k=c.id+'/'+i;
+  if(!imgs[k]){try{const r=await fetch('https://api.github.com/repos/Baloo0oo/content-plan-data/contents/carousels/'+encodeURIComponent(c.id)+'/slide-'+i+'.png',{headers:{...headers(),'Accept':'application/vnd.github.raw+json'},cache:'no-store'});if(!r.ok)throw 0;imgs[k]=URL.createObjectURL(await r.blob())}catch(e){box.textContent='Could not load the slides. Check your connection and open it again.';delete box.dataset.done;return}}
+  out.push(`<a href="${imgs[k]}" download="${esc(c.id)}-${i}.png" title="Slide ${i}"><img src="${imgs[k]}" alt="Slide ${i}"></a>`);
+ }
+ box.innerHTML=out.join('');
+}
+function renderCars(){
+ const list=(data.carousels||[]).slice().sort((a,b)=>String(b.requested||'').localeCompare(String(a.requested||'')));
+ const lab={queued:'In the queue: made within the hour while your computer is on',making:'Being made now…',ready:'Ready',failed:'Could not be made'};
+ $('carlist').innerHTML=list.length?list.map(c=>{const st=c.status||'queued';const when=c.date?` · posts ${fmt(new Date(c.date+'T12:00:00'))}, 6 PM`:'';
+  return `<div class="car"><p class="topic">${esc(c.topic)}</p><p class="st ${esc(st)}">${esc(lab[st]||st)}${esc(when)}${c.error?' · '+esc(c.error):''}</p>${st==='ready'?`<details data-car="${esc(c.id)}"${openCars.has(c.id)?' open':''}><summary>Open the ${esc(c.slides)} slides</summary><div class="strip" id="strip-${esc(c.id)}"></div><p class="note">Tap a slide to download it, or press and hold it to save it to your photos.</p>${c.caption?`<pre dir="rtl">${esc(c.caption)}</pre><button class="link" type="button" data-copy="${esc(c.id)}">Copy caption</button>`:''}</details>`:''}</div>`}).join(''):'<p class="note">No carousels yet.</p>';
+ list.forEach(c=>{if(openCars.has(c.id))loadSlides(c)});
+}
 function show(on){$('setup').hidden=on;$('app').hidden=!on;$('appdays').hidden=!on;$('appfoot').hidden=!on;if(!on)status('Not connected','warn')}
 function weeks(){return [...new Set(data.posts.map(p=>p.week))].sort()}
 function render(){
@@ -205,6 +264,7 @@ function render(){
 ${p.status==='missed'||p.status==='moved'?`<input class="why" id="why-${esc(p.id)}" data-id="${esc(p.id)}" data-f="why" placeholder="Why? (optional)" value="${esc(p.why||'')}">`:''}
 ${p.status==='done'?`<input class="views" id="views-${esc(p.id)}" data-id="${esc(p.id)}" data-f="views" inputmode="numeric" placeholder="Views" value="${esc(p.views||'')}">`:''}</div>
 ${p.script?`<details><summary>Script</summary><pre dir="rtl">${esc(p.script)}</pre></details>`:''}</div>`).join('')}${(()=>{const f=fs.filter(p=>p.day===d);if(!f.length)return '';return `<div class="filmbox"><h3>${d===4?'Filming after Jumu’ah, at home':'Filming at the gym'}</h3>${f.map(p=>`<div class="fr ${p.status==='done'?'done':''}"><button type="button" class="tick" role="checkbox" id="film-${esc(p.id)}" data-film="${esc(p.id)}" aria-checked="${p.status==='done'}" aria-label="Filmed: ${esc(p.topic)}">✓</button><div><p class="topic">${esc(p.topic)}</p><p class="note">${esc(p.note||'')}</p></div></div>`).join('')}</div>`})()}</div>`).join('');
+ renderCars();
  const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.status){b.n++;if(p.status==='done')b.d++}});
  $('slots').innerHTML=Object.keys(S).map(k=>{const b=by[k]||{n:0,d:0};const pc=b.n?Math.round(b.d/b.n*100):0;return `<div class="row" style="--c:var(--${k})"><span>${S[k]}</span><span class="track"><i style="width:${pc}%"></i></span><em>${b.n?pc+'%':'–'}</em></div>`}).join('');
 }
@@ -212,6 +272,15 @@ $('weeks').addEventListener('click',e=>{const b=e.target.closest('button');if(!b
 $('map').addEventListener('click',e=>{const b=e.target.closest('.daybtn');if(b)$('day'+b.dataset.d).scrollIntoView({behavior:'smooth'})});
 $('days').addEventListener('click',e=>{const f=e.target.closest('button[data-film]');if(f){const p=data.posts.find(x=>x.id===f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}const b=e.target.closest('button[data-s]');if(!b)return;const p=data.posts.find(x=>x.id===b.dataset.id);if(p)change(p.id,{status:p.status===b.dataset.s?'':b.dataset.s})});
 $('days').addEventListener('change',e=>{const i=e.target.closest('input[data-f]');if(!i)return;const p=data.posts.find(x=>x.id===i.dataset.id);const v=i.value.trim();if(p&&(p[i.dataset.f]||'')!==v)change(p.id,{[i.dataset.f]:v})});
+$('carlist').addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches('details[data-car]')){if(!d.open){openCars.delete(d.dataset.car);return}openCars.add(d.dataset.car);const c=(data.carousels||[]).find(x=>x.id===d.dataset.car);if(c)loadSlides(c)}},true);
+$('carlist').addEventListener('click',async e=>{const b=e.target.closest('button[data-copy]');if(!b)return;const c=(data.carousels||[]).find(x=>x.id===b.dataset.copy);try{await navigator.clipboard.writeText(c.caption);b.textContent='Copied ✓'}catch(err){b.textContent='Copy failed: select the text instead'}});
+$('carform').addEventListener('submit',async e=>{e.preventDefault();const topic=$('ctopic').value.trim();if(!topic)return;
+ const today=new Date().toISOString().slice(0,10);
+ const req={id:today+'-'+Math.random().toString(36).slice(2,7),topic,type:$('ctype').value,wantSlides:Number($('cslides').value),notes:$('cnotes').value.trim(),source:$('csource').value.trim(),want:$('cwant').value||'',status:'queued',requested:new Date().toISOString()};
+ const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;$('carmsg').textContent='Saving your request online…';
+ try{await mutate(d=>{(d.carousels=d.carousels||[]).push(req)},'Carousel request: '+topic.slice(0,60));$('carform').reset();$('carmsg').textContent='Saved online ✓. Claude will make it within the hour.'}
+ catch(err){$('carmsg').textContent='Not saved. Check your connection and tap the button again.'}
+ btn.disabled=false});
 $('setup').addEventListener('submit',e=>{e.preventDefault();const k=$('key').value.trim();if(!k)return;key=k;ls.set('ghkey',k);$('setupmsg').textContent='Connecting…';load()});
 $('forget').addEventListener('click',()=>{ls.del('ghkey');key=null;show(false)});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&key&&!saving){Object.keys(pending).length?flush():load()}});
