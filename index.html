@@ -17,7 +17,10 @@
 <style>
 /* Today-first planner: dark, one day at a time, details on tap. Same app on phone (bottom tabs) and PC (top tabs + week beside today). */
 :root{--bg:#18191b;--card:#222326;--card2:#1d1e21;--ink:#f1f1ef;--mute:#a9a9a4;--line:#34353a;--ok:#2f9e44;--red:#e5483a;--blue:#4a8cf0;
---LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#5f6672;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b;--FILM:#6b7a8c;color-scheme:dark}
+--LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#5f6672;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b;--FILM:#6b7a8c;--STORY:#e1306c;color-scheme:dark}
+.story{border:2px solid var(--STORY);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.story h3{margin:0 0 2px;font-size:17px;font-weight:800}
+.story .fi .ft{font-weight:500}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 body{font:16px/1.5 Cairo,system-ui,sans-serif;overflow-x:clip;padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom))}
@@ -194,6 +197,7 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 <div>
 <div class="card"><h3 style="margin:0 0 4px">Filming days</h3><ul>
 <li><b>Friday after Jumu’ah, at home (about 2 h):</b> next week’s talking reels and green screens, the carousel slides, and this week’s Reddit reel</li>
+<li><b>Stories every day:</b> 3–5 frames, Q&A box opens Monday, answers on Thursday</li>
 <li><b>Saturday at the gym (about 2 h):</b> next week’s 2 biomech clips, your full workout, and clips for Monday’s life edit</li></ul></div>
 <div class="card"><h3 style="margin:0 0 4px">Rules that never move</h3><ul>
 <li>No offer, link or DM keyword in the owner reel</li>
@@ -209,7 +213,7 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/';
 const D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const DL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const S={LIFE:'Life edit',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming'};
+const S={LIFE:'Life edit',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming',STORY:'Stories'};
 const EFF={LIFE:'Very low · cut from workout footage',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker with Claude',NUTRITION:'Low-medium · green screen',CAROUSEL:'Made by the carousel maker',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl=u=>typeof u==='string'&&u.startsWith('https://')?u:'';
@@ -277,7 +281,9 @@ function show(on){$('setup').hidden=on;$('tabs').hidden=!on;document.querySelect
 function weeks(){return [...new Set(data.posts.map(p=>p.week))].sort()}
 function pickToday(){const ws=weeks();const now=new Date();const w=ws.find(w=>now>=dayDate(w,0)&&now<dayDate(w,7));if(w){cur=w;sel=todayIdx()}else{cur=ws.find(w=>dayDate(w,0)>now)||ws[ws.length-1]||null;sel=0}}
 const isToday=(w,d)=>dayDate(w,d).toDateString()===new Date().toDateString();
-const postsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot!=='FILM').sort((a,b)=>a.order-b.order);
+const postsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot!=='FILM'&&p.slot!=='STORY').sort((a,b)=>a.order-b.order);
+const storyOf=(w,d)=>data.posts.find(p=>p.week===w&&p.day===d&&p.slot==='STORY');
+const frDone=s=>(s.framesDone||[]).filter(i=>i<(s.frames||[]).length).length;
 const filmsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot==='FILM').sort((a,b)=>a.order-b.order);
 const byId=id=>data.posts.find(p=>p.id===id);
 function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
@@ -305,6 +311,10 @@ function filmCard(w,d,fs){
   else if(t&&t.slot!=='WORKOUT'&&t.slot!=='LIFE')inner+=`<p class="mut">No script yet for this one.</p>`;
   return `<div class="fi ${f.status==='done'?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" id="fb-${esc(f.id)}" data-film="${esc(f.id)}" aria-checked="${f.status==='done'}" aria-label="Filmed: ${esc(f.topic)}">✓</button><span class="ft">${esc(f.topic)}</span></div>${det('f:'+f.id,'Details',inner)}</div>`}).join('')}</div>`;
 }
+function storyCard(s){
+ const fr=s.frames||[],dn=s.framesDone||[];const n=frDone(s);
+ return `<div class="story"><h3>${esc(s.topic&&s.topic!=='Stories'?'Stories · '+s.topic:'Stories')}: ${n}/${fr.length}</h3><p class="mut" style="margin:0 0 6px">${esc(s.note||'')}</p>${fr.map((f,i)=>`<div class="fi ${dn.includes(i)?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-frame="${esc(s.id)}" data-i="${i}" aria-checked="${dn.includes(i)}" aria-label="Story frame ${i+1}">✓</button><span class="ft" dir="auto">${esc(f)}</span></div></div>`).join('')}</div>`;
+}
 function nextFilming(){
  const now=new Date();now.setHours(0,0,0,0);
  const f=data.posts.filter(p=>p.slot==='FILM'&&p.status!=='done'&&dayDate(p.week,p.day)>=now).sort((a,b)=>dayDate(a.week,a.day)-dayDate(b.week,b.day))[0];
@@ -312,9 +322,10 @@ function nextFilming(){
 }
 function agenda(w,target){
  $(target).innerHTML=D.map((n,d)=>{const items=data.posts.filter(p=>p.week===w&&p.day===d).sort((a,b)=>a.order-b.order);
-  const ps=items.filter(p=>p.slot!=='FILM'),fs=items.filter(p=>p.slot==='FILM');
+  const ps=items.filter(p=>p.slot!=='FILM'&&p.slot!=='STORY'),fs=items.filter(p=>p.slot==='FILM'),st=items.find(p=>p.slot==='STORY');
   const rows=ps.map(p=>`<button type="button" class="ag ${p.status==='done'?'isdone':''}" style="--c:var(--${esc(p.slot)})" data-go="${d}" data-w="${esc(w)}"><span class="tm">${esc(p.time)}</span><span class="tx">${esc(p.topic)}<small>${esc(S[p.slot]||p.slot)}${p.status==='missed'&&p.why?' · missed: '+esc(p.why):''}</small></span><span class="st ${esc(p.status||'')}"></span></button>`).join('')
-   +(fs.length?`<button type="button" class="ag" style="--c:var(--FILM)" data-go="${d}" data-w="${esc(w)}"><span class="tm">Film</span><span class="tx">${fs.length} to film<small>${fs.filter(f=>f.status==='done').length} done</small></span><span class="st ${fs.every(f=>f.status==='done')?'done':''}"></span></button>`:'');
+   +(fs.length?`<button type="button" class="ag" style="--c:var(--FILM)" data-go="${d}" data-w="${esc(w)}"><span class="tm">Film</span><span class="tx">${fs.length} to film<small>${fs.filter(f=>f.status==='done').length} done</small></span><span class="st ${fs.every(f=>f.status==='done')?'done':''}"></span></button>`:'')
+   +(st?`<button type="button" class="ag" style="--c:var(--STORY)" data-go="${d}" data-w="${esc(w)}"><span class="tm">Story</span><span class="tx">${esc(st.topic==='Stories'?'Stories':st.topic)}<small>${frDone(st)}/${(st.frames||[]).length} frames</small></span><span class="st ${frDone(st)===(st.frames||[]).length&&frDone(st)?'done':''}"></span></button>`:'');
   return `<div class="ag-day"><h4 class="${isToday(w,d)?'today':''}">${D[d].toUpperCase()} ${esc(fmt(dayDate(w,d)))}${isToday(w,d)?' · TODAY':''}</h4>${rows||'<p class="mut">Nothing planned.</p>'}</div>`}).join('');
 }
 function render(){
@@ -327,17 +338,19 @@ function render(){
  const td=isToday(cur,sel);
  $('hdate').textContent=`${DL[sel]} ${fmt(dayDate(cur,sel))}${td?' · today':''}`;
  const left=ps.filter(p=>!p.status).length,fl=fs.filter(f=>f.status!=='done').length;
- $('htitle').textContent=tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
+ const sc0=storyOf(cur,sel);
+ $('htitle').textContent=tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}${sc0?', stories '+frDone(sc0)+'/'+(sc0.frames||[]).length:''}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
  $('strip').innerHTML=D.map((n,d)=>{const p=postsOf(cur,d),f=filmsOf(cur,d);const dots=[];
   if(p.length&&p.every(x=>x.status==='done'))dots.push('var(--ok)');else if(p.some(x=>x.status==='missed'))dots.push('var(--red)');
   if(f.length)dots.push(f.every(x=>x.status==='done')?'var(--ok)':'var(--FILM)');
   return `<button type="button" class="${d===sel?'on':''} ${isToday(cur,d)?'today':''}" data-d="${d}" aria-label="${DL[d]}">${n}<b>${dayDate(cur,d).getDate()}</b><i>${dots.map(c=>`<span style="background:${c}"></span>`).join('')}</i></button>`}).join('');
- const wkPosts=data.posts.filter(p=>p.week===cur&&p.slot!=='FILM');
+ const wkPosts=data.posts.filter(p=>p.week===cur&&p.slot!=='FILM'&&p.slot!=='STORY');
  $('wklabel').textContent=wkPosts.length?`Week of ${fmt(dayDate(cur,0))} · ${wkPosts.filter(p=>p.status==='done').length}/${wkPosts.length} posted`:`Week of ${fmt(dayDate(cur,0))} · filming week`;
  $('wk2label').textContent=`Week of ${fmt(dayDate(cur,0))}`;
  let h=ps.map(postCard).join('');
+ const sc=storyOf(cur,sel);if(sc)h+=storyCard(sc);
  if(fs.length)h+=filmCard(cur,sel,fs);
- if(!ps.length&&!fs.length)h=`<div class="empty">Nothing planned for this day.</div>`;
+ if(!ps.length&&!fs.length&&!sc)h=`<div class="empty">Nothing planned for this day.</div>`;
  if(!fs.length){const nf=nextFilming();if(nf)h+=`<p class="next">${esc(nf)}</p>`}
  $('day').innerHTML=h;
  agenda(cur,'sideweek');agenda(cur,'week');
@@ -347,9 +360,9 @@ function render(){
  document.querySelectorAll('.slides[data-car]').forEach(box=>{const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);const d=box.closest('details');if(c&&d&&d.open)loadSlides(c,box)});
 }
 function renderStats(){
- const wk=data.posts.filter(p=>p.week===cur);const ps=wk.filter(p=>p.slot!=='FILM'),fs=wk.filter(p=>p.slot==='FILM');const c=k=>ps.filter(p=>p.status===k).length;
- $('tiles').innerHTML=`<div><b>${c('done')}/${ps.length}</b><span class="mut">posted this week</span></div><div><b>${c('missed')}</b><span class="mut">missed</span></div><div><b>${c('moved')}</b><span class="mut">moved</span></div><div><b>${fs.filter(f=>f.status==='done').length}/${fs.length}</b><span class="mut">filmed</span></div>`;
- const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.status){b.n++;if(p.status==='done')b.d++}});
+ const wk=data.posts.filter(p=>p.week===cur);const ps=wk.filter(p=>p.slot!=='FILM'&&p.slot!=='STORY'),fs=wk.filter(p=>p.slot==='FILM'),ss=wk.filter(p=>p.slot==='STORY');const c=k=>ps.filter(p=>p.status===k).length;
+ $('tiles').innerHTML=`<div><b>${c('done')}/${ps.length}</b><span class="mut">posted this week</span></div><div><b>${c('missed')}</b><span class="mut">missed</span></div><div><b>${c('moved')}</b><span class="mut">moved</span></div><div><b>${fs.filter(f=>f.status==='done').length}/${fs.length}</b><span class="mut">filmed</span></div><div><b>${ss.filter(s=>frDone(s)&&frDone(s)===(s.frames||[]).length).length}/${ss.length}</b><span class="mut">story days done</span></div>`;
+ const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.slot==='STORY'){if(dayDate(p.week,p.day)<new Date()){b.n++;if(frDone(p)===(p.frames||[]).length)b.d++}return}if(p.status){b.n++;if(p.status==='done')b.d++}});
  $('slots').innerHTML=Object.keys(S).map(k=>{const b=by[k]||{n:0,d:0};const pc=b.n?Math.round(b.d/b.n*100):0;return `<div class="row" style="--c:var(--${k})"><span>${S[k]}</span><span class="track"><i style="width:${pc}%"></i></span><em>${b.n?pc+'%':'–'}</em></div>`}).join('');
 }
 function renderCars(){
@@ -379,6 +392,7 @@ document.addEventListener('toggle',e=>{const d=e.target;if(!(d.matches&&d.matche
 document.addEventListener('click',async e=>{
  const go=e.target.closest('[data-go]');if(go){cur=go.dataset.w;sel=+go.dataset.go;setTab('today');return}
  const s=e.target.closest('button[data-s]');if(s){const p=byId(s.dataset.id);if(p)change(p.id,{status:p.status===s.dataset.s?'':s.dataset.s});return}
+ const fb=e.target.closest('button[data-frame]');if(fb){const p=byId(fb.dataset.frame);if(p){const i=+fb.dataset.i;const dn=(p.framesDone||[]).slice();const k=dn.indexOf(i);if(k>=0)dn.splice(k,1);else dn.push(i);dn.sort((a,b)=>a-b);change(p.id,{framesDone:dn,status:dn.length===(p.frames||[]).length?'done':''})}return}
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
  const cp=e.target.closest('button[data-copyp],button[data-copyc]');if(cp){const txt=cp.dataset.copyp?(byId(cp.dataset.copyp)||{}).script:((data.carousels||[]).find(c=>c.id===cp.dataset.copyc)||{}).caption;try{await navigator.clipboard.writeText(txt||'');cp.textContent='Copied ✓'}catch(err){cp.textContent='Copy failed: select the text instead'}return}
  const ch=e.target.closest('button[data-chg]');if(ch){const id=ch.dataset.chg;const txt=($('chg-'+id).value||'').trim();if(!txt)return;ch.disabled=true;ch.textContent='Sending…';
