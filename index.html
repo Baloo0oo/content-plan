@@ -121,10 +121,18 @@ pre{white-space:pre-wrap;font:17px/1.8 Cairo,sans-serif;background:var(--panel);
 <li>Never name a coach, or a Reddit user</li>
 <li>TikTok: upload the original file</li>
 </ul><button class="link" type="button" id="forget">Disconnect this device</button></div>
+<div class="card"><h3>Connect your phone</h3>
+<p>Show a QR code here, then point your phone's camera at it. Your phone opens the plan already connected, with no copying.</p>
+<button class="big" type="button" id="qrbtn">Show QR code</button>
+<div id="qrbox" hidden><div id="qr" style="background:#fff;padding:12px;border-radius:10px;width:max-content;margin:12px 0"></div>
+<p class="note">Anyone who scans this can edit your plan, so close it once your phone is connected.</p>
+<button class="link" type="button" id="qrclose">Hide QR code</button></div></div>
 </div></section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 {
+if(location.hash.startsWith('#k=')){try{localStorage.setItem('ghkey',decodeURIComponent(location.hash.slice(3)))}catch(e){}history.replaceState(null,'',location.pathname)}
 const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/data.json';
 const D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const S={LIFE:'Life edit',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)'};
@@ -208,6 +216,8 @@ $('days').addEventListener('click',e=>{const b=e.target.closest('button[data-s]'
 $('days').addEventListener('change',e=>{const i=e.target.closest('input[data-f]');if(!i)return;const p=data.posts.find(x=>x.id===i.dataset.id);const v=i.value.trim();if(p&&(p[i.dataset.f]||'')!==v)change(p.id,{[i.dataset.f]:v})});
 $('setup').addEventListener('submit',e=>{e.preventDefault();const k=$('key').value.trim();if(!k)return;key=k;ls.set('ghkey',k);$('setupmsg').textContent='Connecting…';load()});
 $('forget').addEventListener('click',()=>{ls.del('ghkey');key=null;show(false)});
+$('qrbtn').addEventListener('click',()=>{if(!key||typeof QRCode==='undefined')return;const box=$('qr');box.innerHTML='';new QRCode(box,{text:location.origin+location.pathname+'#k='+encodeURIComponent(key),width:240,height:240,correctLevel:QRCode.CorrectLevel.L});$('qrbox').hidden=false});
+$('qrclose').addEventListener('click',()=>{$('qr').innerHTML='';$('qrbox').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&key&&!saving){Object.keys(pending).length?flush():load()}});
 window.addEventListener('online',()=>{if(key)flush()});
 if(key)load();else show(false);
