@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone Designs</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=block" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9e9e6;font-family:Cairo,sans-serif;color:#141414;padding:30px}
+.row{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
+.col h2{font-size:26px;font-weight:800;margin-bottom:4px}
+.col p.d{font-size:15px;color:#555;max-width:375px;margin-bottom:12px;line-height:1.4}
+.phone{width:375px;height:812px;border-radius:40px;overflow:hidden;background:#18191b;color:#f1f1ef;border:10px solid #111;position:relative}
+.pad{padding:14px 16px}
+.mut{color:#a9a9a4;font-size:13px}
+.c{--c:#888}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:6px;padding:0 7px}
+.LIFE{--c:#8a63d2}.COACH{--c:#c2185b}.BIO{--c:#d93a2b}.OWN{--c:#1f7a8c}.NUT{--c:#2f9e44}.CAR{--c:#e08a00}.WOR{--c:#555b66}.TRA{--c:#2b6cd9}.RED{--c:#ff4500}.FILM{--c:#6b7a8c}
+/* A */
+.a-top{padding:16px 16px 8px}
+.a-top h1{font-size:28px;font-weight:800;line-height:1.1}
+.a-days{display:flex;gap:6px;padding:8px 16px 12px;overflow:hidden}
+.a-days span{flex:1;text-align:center;border-radius:12px;padding:6px 0;background:#222326;font-size:12px;font-weight:700;line-height:1.2}
+.a-days span b{display:block;font-size:16px}
+.a-days span.on{background:#f1f1ef;color:#141414}
+.a-days span i{display:block;width:6px;height:6px;border-radius:3px;background:#2f9e44;margin:3px auto 0}
+.a-card{background:#222326;border-radius:16px;padding:14px;margin:0 16px 10px}
+.a-card .t{display:flex;justify-content:space-between;align-items:center}
+.a-card .time{font-size:22px;font-weight:800}
+.a-card h3{font-size:17px;font-weight:700;margin:6px 0 10px;line-height:1.3}
+.a-btns{display:flex;gap:8px}
+.a-btns span{flex:1;text-align:center;border:1px solid #34353a;border-radius:10px;padding:9px 0;font-weight:700;font-size:14px}
+.a-btns .ok{background:#2f9e44;border-color:#2f9e44}
+.a-film{margin:4px 16px;border:2px dashed #6b7a8c;border-radius:16px;padding:10px 14px}
+.a-film div{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:14px}
+.box{width:24px;height:24px;border-radius:7px;border:2px solid #5a5b60;flex:none}
+.box.ok{background:#2f9e44;border-color:#2f9e44}
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:64px;background:#111214;display:flex;border-top:1px solid #2a2b2f}
+.tabbar span{flex:1;text-align:center;font-size:12px;font-weight:700;color:#a9a9a4;padding-top:12px}
+.tabbar span b{display:block;font-size:18px;line-height:1;margin-bottom:4px}
+.tabbar span.on{color:#fff}
+/* B */
+.b-head{position:sticky;top:0;background:#18191b;padding:14px 16px 10px;border-bottom:1px solid #2a2b2f}
+.b-head .wk{display:flex;justify-content:space-between;align-items:center}
+.b-head h1{font-size:20px;font-weight:800}
+.b-head .arr{font-size:22px;font-weight:800;color:#a9a9a4}
+.b-prog{height:6px;background:#34353a;border-radius:3px;margin-top:8px;overflow:hidden}.b-prog i{display:block;height:100%;width:33%;background:#2f9e44}
+.b-day{padding:10px 16px 0}
+.b-day h2{font-size:14px;font-weight:800;color:#a9a9a4;margin-bottom:6px}
+.b-day h2.today{color:#ff6b5b}
+.b-item{display:grid;grid-template-columns:48px 1fr 26px;gap:10px;align-items:center;padding:8px 0;border-left:3px solid var(--c);padding-left:10px;margin-bottom:6px;background:#1f2023;border-radius:0 10px 10px 0}
+.b-item .tm{font-weight:800;font-size:14px}
+.b-item .tx{font-size:14px;font-weight:600;line-height:1.25}
+.b-item .tx small{display:block;color:#a9a9a4;font-weight:400;font-size:12px}
+.b-item .st{width:22px;height:22px;border-radius:50%;border:2px solid #5a5b60}
+.b-item .st.ok{background:#2f9e44;border-color:#2f9e44}
+.b-item .st.miss{background:#d93a2b;border-color:#d93a2b}
+.b-item.done .tx{text-decoration:line-through;color:#a9a9a4}
+/* C */
+.c-top{padding:18px 16px 6px}
+.c-top h1{font-size:30px;font-weight:800;line-height:1.05}
+.c-stats{display:flex;gap:8px;padding:10px 16px}
+.c-stats div{flex:1;background:#222326;border-radius:14px;padding:10px}
+.c-stats b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+.c-seg{display:flex;margin:6px 16px 10px;background:#222326;border-radius:12px;padding:4px}
+.c-seg span{flex:1;text-align:center;padding:7px 0;border-radius:9px;font-weight:700;font-size:14px;color:#a9a9a4}
+.c-seg span.on{background:#f1f1ef;color:#141414}
+.c-row{display:flex;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid #2a2b2f}
+.c-row .box{width:30px;height:30px;border-radius:9px}
+.c-row .tx{flex:1;font-size:15px;font-weight:600;line-height:1.25}
+.c-row .tx small{display:block;font-size:12px;color:#a9a9a4;font-weight:400}
+.c-row .when{font-size:13px;font-weight:800;text-align:right;white-space:nowrap}
+.c-sec{padding:12px 16px 4px;font-size:13px;font-weight:800;color:#a9a9a4}
+</style></head><body>
+<div class="row">
+
+<div class="col"><h2>A · Today first</h2><p class="d">Opens on today. Tap a day in the strip to switch. Big Done / Missed buttons, filming as a tick list, tabs at the bottom for Week, Carousels and Stats.</p>
+<div class="phone">
+<div class="a-top"><div class="mut">Thursday 3 Dec · Week of 30 Nov</div><h1>Today: 2 posts, 0 to film</h1></div>
+<div class="a-days"><span>Mon<b>30</b><i></i></span><span>Tue<b>1</b><i></i></span><span>Wed<b>2</b><i style="background:#d93a2b"></i></span><span class="on">Thu<b>3</b></span><span>Fri<b>4</b></span><span>Sat<b>5</b></span><span>Sun<b>6</b></span></div>
+<div class="a-card"><div class="t"><span class="time">6 PM</span><span class="tag CAR c">Carousel</span></div><h3>Hit your protein in 4 Egyptian meals</h3><div class="a-btns"><span class="ok">Done ✓</span><span>Missed</span><span>Moved</span></div><p class="mut" style="margin-top:8px">9 slides ready · Open slides ›</p></div>
+<div class="a-card"><div class="t"><span class="time">9 PM</span><span class="tag NUT c">Nutrition</span></div><h3>How much protein you really need: 1.6 g/kg</h3><div class="a-btns"><span>Done</span><span>Missed</span><span>Moved</span></div><p class="mut" style="margin-top:8px">Script ›</p></div>
+<div class="a-film"><p style="font-weight:800;font-size:14px;margin-bottom:2px">Tomorrow: filming after Jumu’ah</p><div><span class="box ok"></span>Coaching reel · posts Mon 7 Dec</div><div><span class="box"></span>Owner reel #2 · posts Wed 9 Dec</div><div><span class="box"></span>+ 5 more</div></div>
+<div class="tabbar"><span class="on"><b>●</b>Today</span><span><b>▦</b>Week</span><span><b>▤</b>Carousels</span><span><b>▲</b>Stats</span></div>
+</div></div>
+
+<div class="col"><h2>B · Week agenda</h2><p class="d">The whole week as one tidy list, a coloured line per post type, tap the circle to mark done (tap again for missed). Arrows switch weeks. Closest to today’s page, just cleaner.</p>
+<div class="phone">
+<div class="b-head"><div class="wk"><span class="arr">‹</span><h1>Week of 30 Nov · 3/9 done</h1><span class="arr">›</span></div><div class="b-prog"><i></i></div></div>
+<div class="b-day"><h2>MON 30</h2>
+<div class="b-item LIFE c done"><span class="tm">6 PM</span><span class="tx">Discipline beats motivation<small>Life edit</small></span><span class="st ok"></span></div>
+<div class="b-item COACH c done"><span class="tm">9 PM</span><span class="tx">How my coaching works<small>Coaching</small></span><span class="st ok"></span></div></div>
+<div class="b-day"><h2>TUE 1</h2><div class="b-item BIO c done"><span class="tm">9 PM</span><span class="tx">Squat is hardest at the bottom<small>Biomech</small></span><span class="st ok"></span></div></div>
+<div class="b-day"><h2>WED 2</h2><div class="b-item OWN c"><span class="tm">9 PM</span><span class="tx">Owner #1: the system first<small>Owner · missed: work ran late</small></span><span class="st miss"></span></div></div>
+<div class="b-day"><h2 class="today">THU 3 · TODAY</h2>
+<div class="b-item CAR c"><span class="tm">6 PM</span><span class="tx">Protein in 4 Egyptian meals<small>Carousel · slides ready</small></span><span class="st"></span></div>
+<div class="b-item NUT c"><span class="tm">9 PM</span><span class="tx">How much protein: 1.6 g/kg<small>Nutrition</small></span><span class="st"></span></div></div>
+<div class="b-day"><h2>FRI 4</h2>
+<div class="b-item TRA c"><span class="tm">1 PM</span><span class="tx">The Smith machine isn’t cheating<small>Training · after Jumu’ah</small></span><span class="st"></span></div>
+<div class="b-item FILM c"><span class="tm">Film</span><span class="tx">7 videos to film<small>At home, about 2 h</small></span><span class="st"></span></div></div>
+</div></div>
+
+<div class="col"><h2>C · Checklist</h2><p class="d">Just what’s left to do. Three tabs: To post, To film, Done. Each row is one big tick box with its date. The least to look at.</p>
+<div class="phone">
+<div class="c-top"><div class="mut">Week of 30 Nov</div><h1>6 posts left this week</h1></div>
+<div class="c-stats"><div><b>3/9</b><span class="mut">posted</span></div><div><b>1</b><span class="mut">missed</span></div><div><b>0/10</b><span class="mut">filmed</span></div></div>
+<div class="c-seg"><span class="on">To post</span><span>To film</span><span>Done</span></div>
+<div class="c-sec">TODAY</div>
+<div class="c-row"><span class="box"></span><span class="tx">Protein in 4 Egyptian meals<small><span class="tag CAR c">Carousel</span> slides ready</small></span><span class="when">6 PM</span></div>
+<div class="c-row"><span class="box"></span><span class="tx">How much protein: 1.6 g/kg<small><span class="tag NUT c">Nutrition</span></small></span><span class="when">9 PM</span></div>
+<div class="c-sec">NEXT</div>
+<div class="c-row"><span class="box"></span><span class="tx">The Smith machine isn’t cheating<small><span class="tag TRA c">Training</span> after Jumu’ah</small></span><span class="when">Fri 1 PM</span></div>
+<div class="c-row"><span class="box"></span><span class="tx">Leg day, full session<small><span class="tag WOR c">Workout</span></small></span><span class="when">Sat 2 PM</span></div>
+<div class="c-row"><span class="box"></span><span class="tx">Reddit: office diet<small><span class="tag RED c">Reddit extra</span></small></span><span class="when">Sun 6 PM</span></div>
+<div class="c-row"><span class="box"></span><span class="tx">Transformation #1<small><span class="tag COACH c">Coaching</span></small></span><span class="when">Sun 9 PM</span></div>
+</div></div>
+
+</div></body></html>

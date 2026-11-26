@@ -2,290 +2,400 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Posting Plan</title>
 <meta name="robots" content="noindex">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Posting Plan">
-<meta name="theme-color" content="#141414">
+<meta name="theme-color" content="#18191b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#18191b);--panel:light-dark(#f3f3f1,#222326);--ink:light-dark(#141414,#f1f1ef);--mute:light-dark(#5d5d5a,#a9a9a4);--line:light-dark(#dcdcd8,#34353a);--red:#d93a2b;--ok:#2f9e44;
---LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#555b66;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b;--FILM:#6b7a8c}
-.filmbox{margin-top:12px;border:2px dashed var(--FILM);border-radius:12px;padding:10px 12px}
-.filmbox h3{margin:0 0 4px;font-size:17px;font-weight:800}
-.fr{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
-.fr:first-of-type{border-top:0}
-.fr .tick{width:44px;height:44px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:transparent;font-size:22px;cursor:pointer}
-.fr .tick[aria-checked=true]{background:var(--ok);border-color:var(--ok);color:#fff}
-
-.carsec{margin-top:22px;background:var(--panel);border-radius:14px;padding:16px}
-.carsec h2{margin:0 0 4px;font-size:22px;font-weight:800}
-#carform{display:grid;gap:10px;margin:10px 0 6px}
-#carform label{font-weight:600;font-size:15px}
-#carform textarea{font:16px/1.5 Cairo,sans-serif;min-height:88px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);width:100%}
-#carform input,#carform select{width:100%;font:16px Cairo,sans-serif;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--ink)}
-.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(11em,1fr));gap:10px}
-.car{border-top:1px solid var(--line);padding:12px 0}
-.car .st{font-size:14px;font-weight:600}
-.st.ready{color:var(--ok)}.st.failed{color:var(--red)}.st.queued,.st.making{color:#2b6cd9}
-.strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 0}
-.strip a{flex:none;scroll-snap-align:start}
-.strip img{width:200px;height:250px;object-fit:cover;border-radius:10px;display:block;background:#0a0b0d}
-.fr.done .topic{text-decoration:line-through;color:var(--mute)}
+/* Today-first planner: dark, one day at a time, details on tap. Same app on phone (bottom tabs) and PC (top tabs + week beside today). */
+:root{--bg:#18191b;--card:#222326;--card2:#1d1e21;--ink:#f1f1ef;--mute:#a9a9a4;--line:#34353a;--ok:#2f9e44;--red:#e5483a;--blue:#4a8cf0;
+--LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#5f6672;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b;--FILM:#6b7a8c;color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Cairo,system-ui,sans-serif;overflow-x:clip;padding-top:env(safe-area-inset-top)}
-.band{padding:clamp(22px,4vw,44px) max(5vw,16px)}
-.wrap{max-width:1100px;margin:0 auto}
-h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0 0 6px;font-weight:800}
-.sub{color:var(--mute);margin:0 0 12px;max-width:64ch}
-#status{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:8px 12px;border-radius:10px;font-size:15px;font-weight:600;background:var(--panel)}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.5 Cairo,system-ui,sans-serif;overflow-x:clip;padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font-family:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.mut{color:var(--mute);font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:6px;padding:1px 8px;white-space:nowrap}
+header{padding:14px 0 6px}
+header .mut{margin:0}
+h1{font-size:clamp(26px,4vw,34px);line-height:1.1;font-weight:800;margin:2px 0 0;letter-spacing:-.01em}
+#status{margin:8px 0 0;font-size:13px;font-weight:600;color:var(--mute)}
 #status.ok{color:var(--ok)}#status.warn{color:var(--red)}
-button{font-family:inherit}
-.weeks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.weeks button{font:600 15px Cairo,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
-.weeks button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #2b6cd9;outline-offset:2px}
-.map{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;background:var(--panel);border-radius:14px;padding:10px}
-.daybtn{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:6px;border-radius:10px;min-height:150px}
-.dname{font-weight:800;font-size:15px;line-height:1.1}
-.ddate{font-size:13px;color:var(--mute)}
-.today .dname{color:var(--red)}
-.blk{border-radius:7px;padding:5px 6px;font-size:13px;line-height:1.2;font-weight:600;border:2px solid var(--c);color:var(--ink);overflow-wrap:anywhere}
-.blk.done{background:var(--c);color:#fff}
-.blk.missed{border-style:dashed;text-decoration:line-through;color:var(--mute)}
-.score{display:grid;grid-template-columns:repeat(auto-fit,minmax(8em,1fr));gap:10px;margin-top:14px}
-.score div{background:var(--panel);border-radius:12px;padding:10px 14px}
-.score b{display:block;font-size:clamp(24px,4vw,32px);line-height:1.1;font-weight:800}
-.score span{font-size:13px;color:var(--mute)}
-.reddit{margin-top:18px;border:2px solid var(--REDDIT);border-radius:14px;padding:16px}
-.reddit h2{margin:0 0 4px;font-size:20px;font-weight:800;line-height:1.2}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:#111214;border-top:1px solid #2a2b2f;padding-bottom:env(safe-area-inset-bottom)}
+.tabs[hidden]{display:none}
+.tabs button{flex:1;background:none;border:0;color:var(--mute);font-weight:700;font-size:12px;padding:10px 0 12px;min-height:60px;cursor:pointer}
+.tabs button b{display:block;font-size:19px;line-height:1;margin-bottom:4px}
+.tabs button[aria-selected=true]{color:#fff}
+.view[hidden]{display:none}
+.weekbar{display:flex;align-items:center;gap:6px;margin:10px 0 6px}
+.weekbar button.arr{flex:none;width:36px;height:44px;border-radius:10px;border:0;background:var(--card);color:var(--ink);font-size:20px;font-weight:800;cursor:pointer}
+.weekbar button.arr:disabled{opacity:.3}
+.strip{flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.strip button{border:0;border-radius:12px;background:var(--card);color:var(--ink);padding:6px 0 7px;font-weight:700;font-size:12px;line-height:1.15;cursor:pointer;min-height:56px}
+.strip button b{display:block;font-size:17px}
+.strip button i{display:block;height:6px;margin-top:3px;font-style:normal}
+.strip button i span{display:inline-block;width:6px;height:6px;border-radius:3px;margin:0 1px;vertical-align:top}
+.strip button.on{background:var(--ink);color:#141414}
+.strip button.today:not(.on){box-shadow:inset 0 0 0 2px var(--red)}
+.wklabel{font-size:13px;color:var(--mute);margin:0 0 10px;text-align:center}
+.card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:10px}
+.card.done{opacity:.72}
+.ct{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.time{font-size:22px;font-weight:800;white-space:nowrap}
+.card h3{font-size:17px;font-weight:700;margin:6px 0 10px;line-height:1.35}
+.card.done h3{text-decoration:line-through;color:var(--mute)}
+.btns{display:flex;gap:8px}
+.btns button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer}
+.btns button[aria-pressed=true][data-s=done]{background:var(--ok);border-color:var(--ok)}
+.btns button[aria-pressed=true][data-s=missed]{background:var(--red);border-color:var(--red)}
+.btns button[aria-pressed=true][data-s=moved]{background:var(--ink);border-color:var(--ink);color:#141414}
+details.more{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
+details.more>summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--blue);min-height:36px;display:flex;align-items:center;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:" ›";margin-inline-start:4px}
+details.more[open]>summary::after{content:" ⌄"}
+.dl{margin:6px 0 0;display:grid;gap:8px}
+.dl p{margin:0}
+.dl .k,.k{font-size:12px;font-weight:800;color:var(--mute);margin:0 0 2px}
+pre{white-space:pre-wrap;font:17px/1.85 Cairo,sans-serif;background:var(--card2);border-radius:10px;padding:12px;margin:0;overflow-x:auto}
+.inp{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--card2);color:var(--ink);font-size:16px}
+.copy{background:none;border:0;color:var(--blue);font-weight:700;font-size:14px;padding:6px 0;cursor:pointer}
+.film{border:2px dashed var(--FILM);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.film h3{margin:0 0 2px;font-size:17px;font-weight:800}
+.fi{border-top:1px solid var(--line);padding:8px 0}
+.fi:first-of-type{border-top:0}
+.fr{display:flex;gap:12px;align-items:flex-start}
+.box{flex:none;width:30px;height:30px;border-radius:9px;border:2px solid #5a5b60;background:transparent;color:transparent;font-size:18px;font-weight:800;cursor:pointer;line-height:1}
+.box[aria-checked=true]{background:var(--ok);border-color:var(--ok);color:#fff}
+.fi .ft{font-size:15px;font-weight:600;line-height:1.35}
+.fi.done .ft{text-decoration:line-through;color:var(--mute)}
+.fi details.more{margin:4px 0 0 42px;border:0;padding:0}
+.empty{background:var(--card);border-radius:16px;padding:18px;color:var(--mute)}
+.next{font-size:14px;color:var(--mute);margin:4px 0 10px}
+.ag-day{margin-bottom:10px}
+.ag-day h4{margin:8px 0 6px;font-size:13px;font-weight:800;color:var(--mute);letter-spacing:.02em}
+.ag-day h4.today{color:var(--red)}
+.ag{display:grid;grid-template-columns:52px minmax(0,1fr) 28px;gap:10px;align-items:center;background:var(--card2);border:0;border-left:3px solid var(--c);border-radius:0 10px 10px 0;padding:8px 10px;margin-bottom:6px;cursor:pointer;width:100%;text-align:start;color:var(--ink);font:inherit}
+.ag .tm{font-weight:800;font-size:14px;white-space:nowrap}
+.ag .tx{font-size:14px;font-weight:600;line-height:1.3}
+.ag .tx small{display:block;color:var(--mute);font-weight:400;font-size:12px}
+.ag .st{width:22px;height:22px;border-radius:50%;border:2px solid #5a5b60}
+.ag .st.done{background:var(--ok);border-color:var(--ok)}
+.ag .st.missed{background:var(--red);border-color:var(--red)}
+.ag .st.moved{background:var(--ink);border-color:var(--ink)}
+.ag.isdone .tx{color:var(--mute);text-decoration:line-through}
+.reddit{border:2px solid var(--REDDIT);border-radius:16px;padding:14px;margin-bottom:12px}
+.reddit h3{margin:0 0 4px;font-size:17px;font-weight:800}
 .reddit p{margin:4px 0}
-.reddit a{color:var(--REDDIT);font-weight:600}
-.days{display:grid;gap:22px}
-.day h2{font-size:22px;margin:0 0 6px;font-weight:800;line-height:1.2}
-.post{padding:12px 0;border-top:1px solid var(--line)}
-.ph{display:grid;grid-template-columns:5em minmax(0,1fr);gap:12px}
-.time{font-weight:800;font-size:20px;white-space:nowrap;line-height:1.2}
-.chip{display:inline-block;font-size:13px;font-weight:600;color:#fff;background:var(--c);border-radius:6px;padding:1px 8px;margin-inline-end:6px}
-.eff{font-size:13px;color:var(--mute)}
-.topic{margin:4px 0 0;font-weight:600}
-.note{margin:2px 0 0;color:var(--mute);font-size:15px}
-.done .topic{text-decoration:line-through;color:var(--mute)}
-.acts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0 calc(5em + 12px)}
-.acts button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:600;font-size:15px;cursor:pointer}
-.acts button[aria-pressed=true][data-s=done]{background:var(--ok);border-color:var(--ok);color:#fff}
-.acts button[aria-pressed=true][data-s=missed]{background:var(--red);border-color:var(--red);color:#fff}
-.acts button[aria-pressed=true][data-s=moved]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-input{font:16px Cairo,sans-serif;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--ink)}
-.acts .why{flex:1 1 14em}
-.acts .views{width:8em}
-details{margin:8px 0 0 calc(5em + 12px)}
-summary{cursor:pointer;font-weight:600;min-height:32px}
-pre{white-space:pre-wrap;font:17px/1.8 Cairo,sans-serif;background:var(--panel);border-radius:10px;padding:12px;margin:6px 0 0;overflow-x:auto}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
-.card{background:var(--bg);border-radius:14px;padding:18px}
-.card h3{margin:0 0 8px;font-size:19px;font-weight:800}
-.card ul{margin:0;padding-inline-start:20px}
-.rows{display:grid;gap:6px}
-.row{display:grid;grid-template-columns:7.5em minmax(0,1fr) 4.5em;gap:8px;align-items:center;font-size:15px}
+.reddit a,.dl a{color:#ff7a45;font-weight:700}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(9em,1fr));gap:8px;margin-bottom:12px}
+.tiles div{background:var(--card);border-radius:14px;padding:10px 12px}
+.tiles b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.rows{display:grid;gap:7px}
+.row{display:grid;grid-template-columns:8em minmax(0,1fr) 4em;gap:8px;align-items:center;font-size:15px}
 .track{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
 .track i{display:block;height:100%;background:var(--c)}
 .row em{font-style:normal;text-align:right;white-space:nowrap}
-#setup{max-width:560px;background:var(--panel);border-radius:14px;padding:18px}
+.card ul{margin:4px 0 0;padding-inline-start:20px}
+.card li{margin:3px 0}
+.linkbtn{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px;padding:8px 0}
+#carform{display:grid;gap:10px}
+#carform label{font-weight:700;font-size:14px}
+textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(10em,1fr));gap:10px}
+.big{min-height:48px;padding:0 20px;border-radius:12px;border:0;background:var(--ink);color:#141414;font-weight:800;font-size:16px;cursor:pointer}
+.car{border-top:1px solid var(--line);padding:12px 0}
+.car:first-child{border-top:0}
+.cst{font-size:14px;font-weight:700}
+.cst.ready{color:var(--ok)}.cst.failed{color:var(--red)}.cst.queued,.cst.making{color:var(--blue)}
+.slides{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 0}
+.slides a{flex:none;scroll-snap-align:start}
+.slides img{width:190px;height:238px;object-fit:cover;border-radius:10px;display:block;background:#0a0b0d}
+#setup{max-width:560px;background:var(--card);border-radius:16px;padding:18px;margin-top:14px}
 #setup h2{margin:0 0 6px;font-size:22px}
-#setup input{width:100%;margin:8px 0}
-.big{min-height:48px;padding:0 20px;border-radius:10px;border:0;background:var(--ink);color:var(--bg);font-weight:800;font-size:16px;cursor:pointer}
-.link{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px;padding:8px 0}
-@media(max-width:600px){.map{grid-template-columns:minmax(0,1fr);gap:2px}.daybtn{min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center}.dname{width:3em}.ddate{width:3.5em}.ph{grid-template-columns:4.2em minmax(0,1fr)}.time{font-size:17px}.acts,details{margin-inline-start:0}}
+.side{display:none}
+@media(min-width:900px){
+ body{padding-bottom:30px}
+ .tabs{position:sticky;top:0;bottom:auto;border:0;border-bottom:1px solid #2a2b2f;justify-content:center;gap:6px;padding:0}
+ .tabs button{flex:none;min-height:52px;padding:0 22px;font-size:15px;display:flex;align-items:center;gap:8px}
+ .tabs button b{display:inline;font-size:16px;margin:0}
+ .tabs button[aria-selected=true]{box-shadow:inset 0 -3px 0 var(--ink)}
+ .todaygrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+ .side{display:block;position:sticky;top:70px;max-height:calc(100vh - 90px);overflow:auto;background:var(--card);border-radius:16px;padding:12px 14px}
+ .side h2{margin:2px 0 6px;font-size:18px}
+ .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+}
 </style>
 </head>
 <body>
-<section class="band"><div class="wrap">
-<h1>Posting plan</h1>
-<p class="sub">9 posts a week (Thursday carousel beside the reel, Friday reel after Jumu’ah) plus an extra Reddit reel on Sunday, all times Cairo. Filming is split over Friday and Saturday, for the week after. Every tap is saved online to your private GitHub repo, so your phone and computer always show the same progress.</p>
-<p id="status">Loading…</p>
+<nav class="tabs" role="tablist" id="tabs" hidden>
+<button role="tab" data-tab="today" aria-selected="true" id="t-today"><b>●</b>Today</button>
+<button role="tab" data-tab="week" aria-selected="false" id="t-week"><b>▦</b>Week</button>
+<button role="tab" data-tab="car" aria-selected="false" id="t-car"><b>▤</b>Carousels</button>
+<button role="tab" data-tab="stats" aria-selected="false" id="t-stats"><b>▲</b>Stats</button>
+</nav>
+<div class="wrap">
+<header><p class="mut" id="hdate">Posting plan</p><h1 id="htitle">Loading…</h1><p id="status">Loading…</p></header>
+
 <form id="setup" hidden>
 <h2>Connect this device</h2>
-<p>Paste your GitHub key once. It stays on this device only and lets the page read and save your plan in your private repo.</p>
+<p class="mut">Paste your GitHub key once. It stays on this device only and lets the page read and save your plan in your private repo.</p>
 <label for="key">GitHub key</label>
-<input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+<input class="inp" id="key" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" style="margin:8px 0">
 <button class="big" type="submit">Connect</button>
-<p class="note" id="setupmsg"></p>
+<p class="mut" id="setupmsg"></p>
 </form>
-<div id="app" hidden>
-<div class="weeks" id="weeks"></div>
-<div class="map" id="map"></div>
-<div class="score" id="score"></div>
-<div class="reddit" id="reddit"></div>
-<div class="carsec"><h2>Carousels</h2>
-<p class="note">Type a topic and Claude makes the slides in your style, then books them on the next free Thursday 6 PM. Requests are picked up every hour while your computer is on with the Claude app open.</p>
+
+<section class="view" id="v-today" hidden>
+<div class="weekbar"><button class="arr" type="button" id="prevwk" aria-label="Previous week">‹</button><div class="strip" id="strip"></div><button class="arr" type="button" id="nextwk" aria-label="Next week">›</button></div>
+<p class="wklabel" id="wklabel"></p>
+<div class="todaygrid"><div id="day"></div><aside class="side"><h2>This week</h2><div id="sideweek"></div></aside></div>
+</section>
+
+<section class="view" id="v-week" hidden>
+<div class="weekbar"><button class="arr" type="button" id="prevwk2" aria-label="Previous week">‹</button><div style="flex:1;text-align:center;font-weight:800" id="wk2label"></div><button class="arr" type="button" id="nextwk2" aria-label="Next week">›</button></div>
+<div id="redditbox"></div>
+<div id="week"></div>
+</section>
+
+<section class="view" id="v-car" hidden><div class="grid2">
+<div class="card"><h3 style="margin:0 0 4px">New carousel</h3>
+<p class="mut" style="margin:0 0 10px">Type a topic. Claude writes the slides in your style, checks them, and books the next free Thursday 6 PM. Requests are picked up every hour while your computer is on with the Claude app open.</p>
 <form id="carform">
 <label for="ctopic">Topic</label>
-<input id="ctopic" required maxlength="140" placeholder="e.g. 5 mistakes on the leg press">
+<input class="inp" id="ctopic" required maxlength="140" placeholder="e.g. 5 mistakes on the leg press">
 <div class="two">
-<div><label for="ctype">Type</label><select id="ctype"><option>Nutrition</option><option>Training</option><option>Coaching</option></select></div>
-<div><label for="cslides">Slides</label><select id="cslides"><option>7</option><option selected>8</option><option>9</option></select></div>
-<div><label for="cwant">Post on (optional)</label><input id="cwant" type="date"></div>
+<div><label for="ctype">Type</label><select class="inp" id="ctype"><option>Nutrition</option><option>Training</option><option>Coaching</option></select></div>
+<div><label for="cslides">Slides</label><select class="inp" id="cslides"><option>7</option><option selected>8</option><option>9</option></select></div>
+<div><label for="cwant">Post on (optional)</label><input class="inp" id="cwant" type="date"></div>
 </div>
 <label for="cnotes">Points, angle or numbers to include (optional)</label>
-<textarea id="cnotes" maxlength="1200" placeholder="Anything you want on the slides. Leave empty and Claude picks the points."></textarea>
+<textarea class="inp" id="cnotes" maxlength="1200" placeholder="Anything you want on the slides. Leave empty and Claude picks the points."></textarea>
 <label for="csource">Source to cite (optional)</label>
-<input id="csource" maxlength="200" placeholder="Study or link, if you want one cited">
+<input class="inp" id="csource" maxlength="200" placeholder="Study or link, if you want one cited">
 <button class="big" type="submit">Make this carousel</button>
-<p class="note" id="carmsg"></p>
-</form>
-<div id="carlist"></div></div>
-</div>
+<p class="mut" id="carmsg"></p>
+</form></div>
+<div class="card"><h3 style="margin:0 0 4px">Your carousels</h3><div id="carlist"></div></div>
 </div></section>
 
-<section class="band" style="padding-top:0" id="appdays" hidden><div class="wrap"><div class="days" id="days"></div></div></section>
-
-<section class="band" style="background:var(--panel)" id="appfoot" hidden><div class="wrap cols">
-<div class="card"><h3>Done rate by slot, all weeks</h3><div class="rows" id="slots"></div></div>
-<div class="card"><h3>Two filming days</h3><ul>
+<section class="view" id="v-stats" hidden><div class="grid2">
+<div><div class="tiles" id="tiles"></div><div class="card"><h3 style="margin:0 0 8px">Done rate by type, all weeks</h3><div class="rows" id="slots"></div></div></div>
+<div>
+<div class="card"><h3 style="margin:0 0 4px">Filming days</h3><ul>
 <li><b>Friday after Jumu’ah, at home (about 2 h):</b> next week’s talking reels and green screens, the carousel slides, and this week’s Reddit reel</li>
-<li><b>Saturday at the gym (about 2 h):</b> next week’s biomech clip, your full workout, and clips for Monday’s life edit</li>
-<li>Each filming day lists exactly what to film, with a tick box</li>
-</ul></div>
-<div class="card"><h3>Rules that never move</h3><ul>
+<li><b>Saturday at the gym (about 2 h):</b> next week’s 2 biomech clips, your full workout, and clips for Monday’s life edit</li></ul></div>
+<div class="card"><h3 style="margin:0 0 4px">Rules that never move</h3><ul>
 <li>No offer, link or DM keyword in the owner reel</li>
 <li>No steroids, politics, religion, or medical/injury advice</li>
 <li>Never name a coach, or a Reddit user</li>
-<li>TikTok: upload the original file</li>
-</ul><button class="link" type="button" id="forget">Disconnect this device</button></div>
-</div></section>
+<li>TikTok: upload the original file</li></ul>
+<button class="linkbtn" type="button" id="forget">Disconnect this device</button></div>
+</div></div></section>
+</div>
 
 <script>
 {
-const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/data.json';
+const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/';
 const D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const S={LIFE:'Life edit',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming'};
-const EFF={LIFE:'Very low · cut from workout footage',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker',NUTRITION:'Low-medium · green screen',CAROUSEL:'Medium · 8 slides',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
+const EFF={LIFE:'Very low · cut from workout footage',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker with Claude',NUTRITION:'Low-medium · green screen',CAROUSEL:'Made by the carousel maker',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl=u=>typeof u==='string'&&u.startsWith('https://')?u:'';
 const $=id=>document.getElementById(id);
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const dec=b=>new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g,'')),c=>c.charCodeAt(0)));
 const enc=str=>{const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s)};
-let key=ls.get('ghkey'),data={posts:[],reddit:{}},sha=null,cur=null;
+let key=ls.get('ghkey'),data={posts:[],reddit:{},carousels:[]},cur=null,sel=0,tab='today';
 let pending={};try{pending=JSON.parse(ls.get('pending')||'{}')}catch(e){pending={}}
 let saving=false,retryT=null,flushT=null;
+const openSet=new Set(),imgs={};
 const savePending=()=>ls.set('pending',JSON.stringify(pending));
 const dayDate=(wk,d)=>{const x=new Date(wk+'T12:00:00');x.setDate(x.getDate()+d);return x};
 const fmt=x=>x.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const todayIdx=()=>(new Date().getDay()+6)%7;
 function status(t,c){const s=$('status');s.textContent=t;s.className=c||''}
-function headers(){return {'Authorization':'Bearer '+key,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}}
+function headers(extra){return Object.assign({'Authorization':'Bearer '+key,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},extra||{})}
 async function fetchData(){
- const r=await fetch(API,{headers:headers(),cache:'no-store'});
+ const r=await fetch(API+'data.json',{headers:headers(),cache:'no-store'});
  if(r.status===401||r.status===403||r.status===404){const e=new Error('key');e.key=true;throw e}
  if(!r.ok)throw new Error('http '+r.status);
  const j=await r.json();return {sha:j.sha,data:JSON.parse(dec(j.content))};
 }
 function applyPending(d){for(const id in pending){const p=d.posts.find(x=>x.id===id);if(p)Object.assign(p,pending[id])}return d}
-async function load(){
- try{const r=await fetchData();sha=r.sha;data=applyPending(r.data);show(true);render();
-  if(Object.keys(pending).length)flush();else status('Saved online ✓ · synced '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'ok');}
- catch(e){if(e.key){show(false);$('setupmsg').textContent='That key could not open your plan. Check it can read and write the content-plan-data repo.'}else{status('Offline: can’t reach GitHub. Your taps will save when you’re back online.','warn')}}
+const stamp=()=>new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+async function load(first){
+ try{const r=await fetchData();data=applyPending(r.data);show(true);if(first)pickToday();render();
+  if(Object.keys(pending).length)flush();else status('Saved online ✓ · synced '+stamp(),'ok')}
+ catch(e){if(e.key){show(false);$('setupmsg').textContent='That key could not open your plan. Check it can read and write the content-plan-data repo.'}else status('Offline: can’t reach GitHub. Your taps will save when you’re back online.','warn')}
 }
+async function putData(d,msg,sha){return fetch(API+'data.json',{method:'PUT',headers:headers({'Content-Type':'application/json'}),body:JSON.stringify({message:msg,content:enc(JSON.stringify(d,null,1)),sha})})}
 async function flush(){
  if(saving||!Object.keys(pending).length)return;
  saving=true;clearTimeout(retryT);status('Saving online…');
  const batch=JSON.parse(JSON.stringify(pending));
  try{
-  for(let attempt=0;attempt<4;attempt++){
+  for(let a=0;a<4;a++){
    const r=await fetchData();const d=r.data;
    for(const id in batch){const p=d.posts.find(x=>x.id===id);if(p)Object.assign(p,batch[id])}
    d.updated=new Date().toISOString();
-   const put=await fetch(API,{method:'PUT',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({message:'Tracker: '+Object.keys(batch).join(', '),content:enc(JSON.stringify(d,null,1)),sha:r.sha})});
-   if(put.ok){const j=await put.json();sha=j.content.sha;
-    for(const id in batch){if(JSON.stringify(pending[id])===JSON.stringify(batch[id]))delete pending[id]}
-    savePending();data=applyPending(d);render();saving=false;
-    status('Saved online ✓ · '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'ok');
+   const put=await putData(d,'Tracker: '+Object.keys(batch).join(', '),r.sha);
+   if(put.ok){for(const id in batch){if(JSON.stringify(pending[id])===JSON.stringify(batch[id]))delete pending[id]}
+    savePending();data=applyPending(d);render();saving=false;status('Saved online ✓ · '+stamp(),'ok');
     if(Object.keys(pending).length)flush();return}
    if(put.status!==409&&put.status!==422)throw new Error('http '+put.status);
   }
   throw new Error('conflict');
- }catch(e){saving=false;status('Not saved online yet. Retrying… (keep this page open or reopen it later)','warn');retryT=setTimeout(flush,15000)}
+ }catch(e){saving=false;status('Not saved online yet. Retrying… (keep the page open or reopen it later)','warn');retryT=setTimeout(flush,15000)}
+}
+async function mutate(fn,msg){
+ for(let a=0;a<4;a++){
+  const r=await fetchData();const d=r.data;fn(d);d.updated=new Date().toISOString();
+  const put=await putData(d,msg,r.sha);
+  if(put.ok){data=applyPending(d);render();return true}
+  if(put.status!==409&&put.status!==422)throw new Error('http '+put.status);
+ }
+ throw new Error('conflict');
 }
 function change(id,fields){
  const p=data.posts.find(x=>x.id===id);if(!p)return;
  Object.assign(p,fields);pending[id]={...(pending[id]||{}),...fields};savePending();render();
  status('Saving online…');clearTimeout(flushT);flushT=setTimeout(flush,700);
 }
-async function mutate(fn,msg){
- for(let attempt=0;attempt<4;attempt++){
-  const r=await fetchData();const d=r.data;fn(d);d.updated=new Date().toISOString();
-  const put=await fetch(API,{method:'PUT',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({message:msg,content:enc(JSON.stringify(d,null,1)),sha:r.sha})});
-  if(put.ok){const j=await put.json();sha=j.content.sha;data=applyPending(d);render();return true}
-  if(put.status!==409&&put.status!==422)throw new Error('http '+put.status);
- }
- throw new Error('conflict');
+function show(on){$('setup').hidden=on;$('tabs').hidden=!on;document.querySelectorAll('.view').forEach(v=>v.hidden=!on||v.id!=='v-'+tab);if(!on){$('htitle').textContent='Connect this device';status('Not connected','warn')}}
+function weeks(){return [...new Set(data.posts.map(p=>p.week))].sort()}
+function pickToday(){const ws=weeks();const now=new Date();const w=ws.find(w=>now>=dayDate(w,0)&&now<dayDate(w,7));if(w){cur=w;sel=todayIdx()}else{cur=ws.find(w=>dayDate(w,0)>now)||ws[ws.length-1]||null;sel=0}}
+const isToday=(w,d)=>dayDate(w,d).toDateString()===new Date().toDateString();
+const postsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot!=='FILM').sort((a,b)=>a.order-b.order);
+const filmsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot==='FILM').sort((a,b)=>a.order-b.order);
+const byId=id=>data.posts.find(p=>p.id===id);
+function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
+function kv(k,v){return v?`<div><p class="k">${esc(k)}</p><p>${v}</p></div>`:''}
+function postCard(p){
+ const car=p.carousel?(data.carousels||[]).find(c=>c.id===p.carousel):null;
+ const r=p.slot==='REDDIT'?(data.reddit||{})[p.week]:null;
+ let inner=kv('What',esc(EFF[p.slot]||''))+kv('Notes',esc(p.note||''));
+ if(r){const u=safeUrl(r.url);inner+=kv('Reddit post',`${esc(r.topic)} · ${esc(r.sub)} · ${esc(r.comments)} comments${u?` · <a href="${esc(u)}" target="_blank" rel="noopener">open</a>`:''}`)+kv('Angle',esc(r.angle||''))}
+ if(car&&car.status==='ready')inner+=`<div><p class="k">Slides</p><div class="slides" id="ps-${esc(p.id)}" data-car="${esc(car.id)}"></div><p class="mut">Tap a slide to download it, or press and hold to save it to your photos.</p></div>`;
+ if(p.script)inner+=`<div><p class="k">${p.slot==='CAROUSEL'?'Caption':'Script'}</p><pre dir="rtl">${esc(p.script)}</pre><button class="copy" type="button" data-copyp="${esc(p.id)}">Copy</button></div>`;
+ if(p.status==='missed'||p.status==='moved')inner+=`<div><p class="k">Why?</p><input class="inp" id="why-${esc(p.id)}" data-id="${esc(p.id)}" data-f="why" placeholder="Optional" value="${esc(p.why||'')}"></div>`;
+ if(p.status==='done')inner+=`<div><p class="k">Views</p><input class="inp" id="views-${esc(p.id)}" data-id="${esc(p.id)}" data-f="views" inputmode="numeric" placeholder="Add later" value="${esc(p.views||'')}"></div>`;
+ return `<div class="card ${p.status==='done'?'done':''}" id="c-${esc(p.id)}"><div class="ct"><span class="time">${esc(p.time)}</span><span class="tag" style="--c:var(--${esc(p.slot)})">${esc(S[p.slot]||p.slot)}</span></div><h3>${esc(p.topic)}</h3>
+<div class="btns">${['done','missed','moved'].map(s=>`<button type="button" data-id="${esc(p.id)}" data-s="${s}" aria-pressed="${p.status===s}">${s==='done'?(p.status==='done'?'Done ✓':'Done'):s==='missed'?'Missed':'Moved'}</button>`).join('')}</div>
+${det('p:'+p.id,'Details',inner)}</div>`;
 }
-const imgs={},openCars=new Set();
-async function loadSlides(c){
- const box=$('strip-'+c.id);if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading slides…';
- const out=[];
- for(let i=1;i<=(c.slides||0);i++){
-  const k=c.id+'/'+i;
-  if(!imgs[k]){try{const r=await fetch('https://api.github.com/repos/Baloo0oo/content-plan-data/contents/carousels/'+encodeURIComponent(c.id)+'/slide-'+i+'.png',{headers:{...headers(),'Accept':'application/vnd.github.raw+json'},cache:'no-store'});if(!r.ok)throw 0;imgs[k]=URL.createObjectURL(await r.blob())}catch(e){box.textContent='Could not load the slides. Check your connection and open it again.';delete box.dataset.done;return}}
-  out.push(`<a href="${imgs[k]}" download="${esc(c.id)}-${i}.png" title="Slide ${i}"><img src="${imgs[k]}" alt="Slide ${i}"></a>`);
- }
- box.innerHTML=out.join('');
+function filmCard(w,d,fs){
+ const left=fs.filter(f=>f.status!=='done').length;
+ const where=d===4?'Friday after Jumu’ah, at home':d===5?'Saturday at the gym':'Filming';
+ return `<div class="film"><h3>To film: ${left?left+' left':'all done ✓'}</h3><p class="mut" style="margin:0 0 6px">${esc(where)} · about 2 h</p>${fs.map(f=>{const t=f.for?byId(f.for):null;
+  let inner=kv('For',t?`${esc(S[t.slot]||t.slot)} · ${esc(fmt(dayDate(t.week,t.day)))}, ${esc(t.time)}`:'')+kv('How',esc(f.note||''));
+  if(t&&t.note)inner+=kv('Post notes',esc(t.note));
+  if(t&&t.script)inner+=`<div><p class="k">Script</p><pre dir="rtl">${esc(t.script)}</pre></div>`;
+  else if(t&&t.slot!=='WORKOUT'&&t.slot!=='LIFE')inner+=`<p class="mut">No script yet for this one.</p>`;
+  return `<div class="fi ${f.status==='done'?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" id="fb-${esc(f.id)}" data-film="${esc(f.id)}" aria-checked="${f.status==='done'}" aria-label="Filmed: ${esc(f.topic)}">✓</button><span class="ft">${esc(f.topic)}</span></div>${det('f:'+f.id,'Details',inner)}</div>`}).join('')}</div>`;
+}
+function nextFilming(){
+ const now=new Date();now.setHours(0,0,0,0);
+ const f=data.posts.filter(p=>p.slot==='FILM'&&p.status!=='done'&&dayDate(p.week,p.day)>=now).sort((a,b)=>dayDate(a.week,a.day)-dayDate(b.week,b.day))[0];
+ return f?`Next filming: ${DL[f.day]} ${fmt(dayDate(f.week,f.day))}`:'';
+}
+function agenda(w,target){
+ $(target).innerHTML=D.map((n,d)=>{const items=data.posts.filter(p=>p.week===w&&p.day===d).sort((a,b)=>a.order-b.order);
+  const ps=items.filter(p=>p.slot!=='FILM'),fs=items.filter(p=>p.slot==='FILM');
+  const rows=ps.map(p=>`<button type="button" class="ag ${p.status==='done'?'isdone':''}" style="--c:var(--${esc(p.slot)})" data-go="${d}" data-w="${esc(w)}"><span class="tm">${esc(p.time)}</span><span class="tx">${esc(p.topic)}<small>${esc(S[p.slot]||p.slot)}${p.status==='missed'&&p.why?' · missed: '+esc(p.why):''}</small></span><span class="st ${esc(p.status||'')}"></span></button>`).join('')
+   +(fs.length?`<button type="button" class="ag" style="--c:var(--FILM)" data-go="${d}" data-w="${esc(w)}"><span class="tm">Film</span><span class="tx">${fs.length} to film<small>${fs.filter(f=>f.status==='done').length} done</small></span><span class="st ${fs.every(f=>f.status==='done')?'done':''}"></span></button>`:'');
+  return `<div class="ag-day"><h4 class="${isToday(w,d)?'today':''}">${D[d].toUpperCase()} ${esc(fmt(dayDate(w,d)))}${isToday(w,d)?' · TODAY':''}</h4>${rows||'<p class="mut">Nothing planned.</p>'}</div>`}).join('');
+}
+function render(){
+ if(!cur)pickToday();
+ if(!cur){$('htitle').textContent='No plan yet';return}
+ const ws=weeks(),wi=ws.indexOf(cur);
+ for(const id of ['prevwk','prevwk2'])$(id).disabled=wi<=0;
+ for(const id of ['nextwk','nextwk2'])$(id).disabled=wi>=ws.length-1;
+ const ps=postsOf(cur,sel),fs=filmsOf(cur,sel);
+ const td=isToday(cur,sel);
+ $('hdate').textContent=`${DL[sel]} ${fmt(dayDate(cur,sel))}${td?' · today':''}`;
+ const left=ps.filter(p=>!p.status).length,fl=fs.filter(f=>f.status!=='done').length;
+ $('htitle').textContent=tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
+ $('strip').innerHTML=D.map((n,d)=>{const p=postsOf(cur,d),f=filmsOf(cur,d);const dots=[];
+  if(p.length&&p.every(x=>x.status==='done'))dots.push('var(--ok)');else if(p.some(x=>x.status==='missed'))dots.push('var(--red)');
+  if(f.length)dots.push(f.every(x=>x.status==='done')?'var(--ok)':'var(--FILM)');
+  return `<button type="button" class="${d===sel?'on':''} ${isToday(cur,d)?'today':''}" data-d="${d}" aria-label="${DL[d]}">${n}<b>${dayDate(cur,d).getDate()}</b><i>${dots.map(c=>`<span style="background:${c}"></span>`).join('')}</i></button>`}).join('');
+ const wkPosts=data.posts.filter(p=>p.week===cur&&p.slot!=='FILM');
+ $('wklabel').textContent=wkPosts.length?`Week of ${fmt(dayDate(cur,0))} · ${wkPosts.filter(p=>p.status==='done').length}/${wkPosts.length} posted`:`Week of ${fmt(dayDate(cur,0))} · filming week`;
+ $('wk2label').textContent=`Week of ${fmt(dayDate(cur,0))}`;
+ let h=ps.map(postCard).join('');
+ if(fs.length)h+=filmCard(cur,sel,fs);
+ if(!ps.length&&!fs.length)h=`<div class="empty">Nothing planned for this day.</div>`;
+ if(!fs.length){const nf=nextFilming();if(nf)h+=`<p class="next">${esc(nf)}</p>`}
+ $('day').innerHTML=h;
+ agenda(cur,'sideweek');agenda(cur,'week');
+ const r=(data.reddit||{})[cur];
+ $('redditbox').innerHTML=r?`<div class="reddit"><h3>Reddit this week: ${esc(r.topic)}</h3><p class="mut">${esc(r.sub)} · ${esc(r.comments)} comments${safeUrl(r.url)?` · <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">open the post</a>`:''}</p><p>${esc(r.angle)}</p>${r.backup?`<p class="mut">Backup: ${esc(r.backup)}</p>`:''}</div>`:'';
+ renderCars();renderStats();
+ document.querySelectorAll('.slides[data-car]').forEach(box=>{const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);const d=box.closest('details');if(c&&d&&d.open)loadSlides(c,box)});
+}
+function renderStats(){
+ const wk=data.posts.filter(p=>p.week===cur);const ps=wk.filter(p=>p.slot!=='FILM'),fs=wk.filter(p=>p.slot==='FILM');const c=k=>ps.filter(p=>p.status===k).length;
+ $('tiles').innerHTML=`<div><b>${c('done')}/${ps.length}</b><span class="mut">posted this week</span></div><div><b>${c('missed')}</b><span class="mut">missed</span></div><div><b>${c('moved')}</b><span class="mut">moved</span></div><div><b>${fs.filter(f=>f.status==='done').length}/${fs.length}</b><span class="mut">filmed</span></div>`;
+ const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.status){b.n++;if(p.status==='done')b.d++}});
+ $('slots').innerHTML=Object.keys(S).map(k=>{const b=by[k]||{n:0,d:0};const pc=b.n?Math.round(b.d/b.n*100):0;return `<div class="row" style="--c:var(--${k})"><span>${S[k]}</span><span class="track"><i style="width:${pc}%"></i></span><em>${b.n?pc+'%':'–'}</em></div>`}).join('');
 }
 function renderCars(){
  const list=(data.carousels||[]).slice().sort((a,b)=>String(b.requested||'').localeCompare(String(a.requested||'')));
  const lab={queued:'In the queue: made within the hour while your computer is on',making:'Being made now…',ready:'Ready',failed:'Could not be made'};
  $('carlist').innerHTML=list.length?list.map(c=>{const st=c.status||'queued';const when=c.date?` · posts ${fmt(new Date(c.date+'T12:00:00'))}, 6 PM`:'';
-  return `<div class="car"><p class="topic">${esc(c.topic)}</p><p class="st ${esc(st)}">${esc(lab[st]||st)}${esc(when)}${c.error?' · '+esc(c.error):''}</p>${st==='ready'?`<details data-car="${esc(c.id)}"${openCars.has(c.id)?' open':''}><summary>Open the ${esc(c.slides)} slides</summary><div class="strip" id="strip-${esc(c.id)}"></div><p class="note">Tap a slide to download it, or press and hold it to save it to your photos.</p>${c.caption?`<pre dir="rtl">${esc(c.caption)}</pre><button class="link" type="button" data-copy="${esc(c.id)}">Copy caption</button>`:''}</details>`:''}</div>`}).join(''):'<p class="note">No carousels yet.</p>';
- list.forEach(c=>{if(openCars.has(c.id))loadSlides(c)});
+  let inner='';
+  if(st==='ready'){inner=`<div class="slides" id="cs-${esc(c.id)}" data-car="${esc(c.id)}"></div><p class="mut">Tap a slide to download it, or press and hold to save it to your photos.</p>${c.caption?`<div><p class="k">Caption</p><pre dir="rtl">${esc(c.caption)}</pre><button class="copy" type="button" data-copyc="${esc(c.id)}">Copy caption</button></div>`:''}
+<div><p class="k">Want changes?</p><textarea class="inp" id="chg-${esc(c.id)}" maxlength="800" placeholder="e.g. make slide 3 simpler, change the cover"></textarea><button class="big" type="button" data-chg="${esc(c.id)}" style="margin-top:8px">Send changes</button></div>`}
+  return `<div class="car"><p style="margin:0;font-weight:700">${esc(c.topic)}</p><p class="cst ${esc(st)}" style="margin:2px 0 0">${esc(lab[st]||st)}${esc(when)}${c.changes?' · changes requested':''}${c.error?' · '+esc(c.error):''}</p>${inner?det('c:'+c.id,'Open slides',inner):''}</div>`}).join(''):'<p class="mut">No carousels yet.</p>';
 }
-function show(on){$('setup').hidden=on;$('app').hidden=!on;$('appdays').hidden=!on;$('appfoot').hidden=!on;if(!on)status('Not connected','warn')}
-function weeks(){return [...new Set(data.posts.map(p=>p.week))].sort()}
-function render(){
- const ws=weeks();
- if(!cur||!ws.includes(cur)){const now=new Date();cur=ws.find(w=>now>=dayDate(w,0)&&now<dayDate(w,7))||ws.find(w=>dayDate(w,0)>now)||ws[ws.length-1]||null}
- if(!cur){$('days').innerHTML='<p>No plan yet.</p>';return}
- const all=data.posts.filter(p=>p.week===cur).sort((a,b)=>a.order-b.order);
- const ps=all.filter(p=>p.slot!=='FILM'),fs=all.filter(p=>p.slot==='FILM');
- const todayKey=new Date().toDateString();
- $('weeks').innerHTML=ws.map((w,i)=>`<button type="button" data-w="${esc(w)}" aria-pressed="${w===cur}">${data.posts.some(p=>p.week===w&&p.slot!=='FILM')?'Week of':'Filming ·'} ${fmt(dayDate(w,0))}</button>`).join('');
- $('map').innerHTML=D.map((n,d)=>{const dt=dayDate(cur,d);return `<button type="button" class="daybtn${dt.toDateString()===todayKey?' today':''}" data-d="${d}"><span class="dname">${n}</span><span class="ddate">${fmt(dt)}</span>${ps.filter(p=>p.day===d).map(p=>`<span class="blk ${esc(p.status||'')}" style="--c:var(--${esc(p.slot)})">${esc(p.time)} ${esc(S[p.slot]||p.slot)}</span>`).join('')}${(()=>{const f=fs.filter(p=>p.day===d);if(!f.length)return '';const dn=f.filter(p=>p.status==='done').length;return `<span class="blk${dn===f.length?' done':''}" style="--c:var(--FILM)">Film ${dn}/${f.length}</span>`})()}</button>`}).join('');
- const c=k=>ps.filter(p=>p.status===k).length;
- $('score').innerHTML=`<div><b>${c('done')}/${ps.length}</b><span>done this week</span></div><div><b>${c('missed')}</b><span>missed</span></div><div><b>${c('moved')}</b><span>moved</span></div><div><b>${ps.length-c('done')-c('missed')-c('moved')}</b><span>still to post</span></div><div><b>${fs.filter(p=>p.status==='done').length}/${fs.length}</b><span>filmed this week</span></div>`;
- const r=(data.reddit||{})[cur];
- $('reddit').innerHTML=r?`<h2>Reddit this week: ${esc(r.topic)}</h2><p>${esc(r.sub)} · ${esc(r.comments)} comments${safeUrl(r.url)?` · <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">open the post</a>`:''}</p><p>${esc(r.angle)}</p>${r.backup?`<p class="note">Backup: ${esc(r.backup)}</p>`:''}<p class="note">Updated ${esc(r.updated||'')}</p>`:'<h2>Reddit this week</h2><p class="note">Not picked yet. The update runs on Friday morning.</p>';
- $('days').innerHTML=D.map((n,d)=>`<div class="day" id="day${d}"><h2>${n} ${fmt(dayDate(cur,d))}</h2>${ps.filter(p=>p.day===d).map(p=>`<div class="post ${esc(p.status||'')}"><div class="ph"><span class="time">${esc(p.time)}</span><div><span class="chip" style="--c:var(--${esc(p.slot)})">${esc(S[p.slot]||p.slot)}</span><span class="eff">${esc(EFF[p.slot]||'')}</span><p class="topic">${esc(p.topic)}</p>${p.note?`<p class="note">${esc(p.note)}</p>`:''}</div></div>
-<div class="acts">${['done','missed','moved'].map(s=>`<button type="button" data-id="${esc(p.id)}" data-s="${s}" aria-pressed="${p.status===s}">${s==='done'?'Done':s==='missed'?'Missed':'Moved'}</button>`).join('')}
-${p.status==='missed'||p.status==='moved'?`<input class="why" id="why-${esc(p.id)}" data-id="${esc(p.id)}" data-f="why" placeholder="Why? (optional)" value="${esc(p.why||'')}">`:''}
-${p.status==='done'?`<input class="views" id="views-${esc(p.id)}" data-id="${esc(p.id)}" data-f="views" inputmode="numeric" placeholder="Views" value="${esc(p.views||'')}">`:''}</div>
-${p.script?`<details><summary>Script</summary><pre dir="rtl">${esc(p.script)}</pre></details>`:''}</div>`).join('')}${(()=>{const f=fs.filter(p=>p.day===d);if(!f.length)return '';return `<div class="filmbox"><h3>${d===4?'Filming after Jumu’ah, at home':'Filming at the gym'}</h3>${f.map(p=>`<div class="fr ${p.status==='done'?'done':''}"><button type="button" class="tick" role="checkbox" id="film-${esc(p.id)}" data-film="${esc(p.id)}" aria-checked="${p.status==='done'}" aria-label="Filmed: ${esc(p.topic)}">✓</button><div><p class="topic">${esc(p.topic)}</p><p class="note">${esc(p.note||'')}</p></div></div>`).join('')}</div>`})()}</div>`).join('');
- renderCars();
- const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.status){b.n++;if(p.status==='done')b.d++}});
- $('slots').innerHTML=Object.keys(S).map(k=>{const b=by[k]||{n:0,d:0};const pc=b.n?Math.round(b.d/b.n*100):0;return `<div class="row" style="--c:var(--${k})"><span>${S[k]}</span><span class="track"><i style="width:${pc}%"></i></span><em>${b.n?pc+'%':'–'}</em></div>`}).join('');
+async function loadSlides(c,box){
+ if(!box||box.dataset.done)return;box.dataset.done='1';box.textContent='Loading slides…';
+ const out=[];
+ for(let i=1;i<=(c.slides||0);i++){const k=c.id+'/'+i;
+  if(!imgs[k]){try{const r=await fetch(API+'carousels/'+encodeURIComponent(c.id)+'/slide-'+i+'.png',{headers:headers({'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(!r.ok)throw 0;imgs[k]=URL.createObjectURL(await r.blob())}catch(e){box.textContent='Could not load the slides. Close and open again.';delete box.dataset.done;return}}
+  out.push(`<a href="${imgs[k]}" download="${esc(c.id)}-${i}.png"><img src="${imgs[k]}" alt="Slide ${i}"></a>`)}
+ box.innerHTML=out.join('');
 }
-$('weeks').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cur=b.dataset.w;render()});
-$('map').addEventListener('click',e=>{const b=e.target.closest('.daybtn');if(b)$('day'+b.dataset.d).scrollIntoView({behavior:'smooth'})});
-$('days').addEventListener('click',e=>{const f=e.target.closest('button[data-film]');if(f){const p=data.posts.find(x=>x.id===f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}const b=e.target.closest('button[data-s]');if(!b)return;const p=data.posts.find(x=>x.id===b.dataset.id);if(p)change(p.id,{status:p.status===b.dataset.s?'':b.dataset.s})});
-$('days').addEventListener('change',e=>{const i=e.target.closest('input[data-f]');if(!i)return;const p=data.posts.find(x=>x.id===i.dataset.id);const v=i.value.trim();if(p&&(p[i.dataset.f]||'')!==v)change(p.id,{[i.dataset.f]:v})});
-$('carlist').addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches('details[data-car]')){if(!d.open){openCars.delete(d.dataset.car);return}openCars.add(d.dataset.car);const c=(data.carousels||[]).find(x=>x.id===d.dataset.car);if(c)loadSlides(c)}},true);
-$('carlist').addEventListener('click',async e=>{const b=e.target.closest('button[data-copy]');if(!b)return;const c=(data.carousels||[]).find(x=>x.id===b.dataset.copy);try{await navigator.clipboard.writeText(c.caption);b.textContent='Copied ✓'}catch(err){b.textContent='Copy failed: select the text instead'}});
+function setTab(t){tab=t;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!=='v-'+t);render();window.scrollTo(0,0)}
+function stepWeek(n){const ws=weeks(),i=ws.indexOf(cur)+n;if(i<0||i>=ws.length)return;cur=ws[i];sel=isToday(cur,todayIdx())?todayIdx():0;render()}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)setTab(b.dataset.tab)});
+$('strip').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;sel=+b.dataset.d;render()});
+for(const [id,n] of [['prevwk',-1],['nextwk',1],['prevwk2',-1],['nextwk2',1]])$(id).addEventListener('click',()=>stepWeek(n));
+document.addEventListener('toggle',e=>{const d=e.target;if(!(d.matches&&d.matches('details[data-k]')))return;if(d.open)openSet.add(d.dataset.k);else openSet.delete(d.dataset.k);
+ if(d.open){const box=d.querySelector('.slides[data-car]');if(box){const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);if(c)loadSlides(c,box)}}},true);
+document.addEventListener('click',async e=>{
+ const go=e.target.closest('[data-go]');if(go){cur=go.dataset.w;sel=+go.dataset.go;setTab('today');return}
+ const s=e.target.closest('button[data-s]');if(s){const p=byId(s.dataset.id);if(p)change(p.id,{status:p.status===s.dataset.s?'':s.dataset.s});return}
+ const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
+ const cp=e.target.closest('button[data-copyp],button[data-copyc]');if(cp){const txt=cp.dataset.copyp?(byId(cp.dataset.copyp)||{}).script:((data.carousels||[]).find(c=>c.id===cp.dataset.copyc)||{}).caption;try{await navigator.clipboard.writeText(txt||'');cp.textContent='Copied ✓'}catch(err){cp.textContent='Copy failed: select the text instead'}return}
+ const ch=e.target.closest('button[data-chg]');if(ch){const id=ch.dataset.chg;const txt=($('chg-'+id).value||'').trim();if(!txt)return;ch.disabled=true;ch.textContent='Sending…';
+  try{await mutate(d=>{const c=(d.carousels||[]).find(x=>x.id===id);if(c){c.changes=txt;c.status='queued'}},'Carousel changes: '+id);status('Changes saved online ✓ · Claude remakes it within the hour','ok')}catch(err){ch.disabled=false;ch.textContent='Not sent. Try again'}}
+});
+document.addEventListener('change',e=>{const i=e.target.closest('input[data-f]');if(!i)return;const p=byId(i.dataset.id);const v=i.value.trim();if(p&&(p[i.dataset.f]||'')!==v)change(p.id,{[i.dataset.f]:v})});
 $('carform').addEventListener('submit',async e=>{e.preventDefault();const topic=$('ctopic').value.trim();if(!topic)return;
- const today=new Date().toISOString().slice(0,10);
- const req={id:today+'-'+Math.random().toString(36).slice(2,7),topic,type:$('ctype').value,wantSlides:Number($('cslides').value),notes:$('cnotes').value.trim(),source:$('csource').value.trim(),want:$('cwant').value||'',status:'queued',requested:new Date().toISOString()};
+ const req={id:new Date().toISOString().slice(0,10)+'-'+Math.random().toString(36).slice(2,7),topic,type:$('ctype').value,wantSlides:Number($('cslides').value),notes:$('cnotes').value.trim(),source:$('csource').value.trim(),want:$('cwant').value||'',status:'queued',requested:new Date().toISOString()};
  const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;$('carmsg').textContent='Saving your request online…';
  try{await mutate(d=>{(d.carousels=d.carousels||[]).push(req)},'Carousel request: '+topic.slice(0,60));$('carform').reset();$('carmsg').textContent='Saved online ✓. Claude will make it within the hour.'}
  catch(err){$('carmsg').textContent='Not saved. Check your connection and tap the button again.'}
  btn.disabled=false});
-$('setup').addEventListener('submit',e=>{e.preventDefault();const k=$('key').value.trim();if(!k)return;key=k;ls.set('ghkey',k);$('setupmsg').textContent='Connecting…';load()});
+$('setup').addEventListener('submit',e=>{e.preventDefault();const k=$('key').value.trim();if(!k)return;key=k;ls.set('ghkey',k);$('setupmsg').textContent='Connecting…';load(true)});
 $('forget').addEventListener('click',()=>{ls.del('ghkey');key=null;show(false)});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&key&&!saving){Object.keys(pending).length?flush():load()}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&key&&!saving){Object.keys(pending).length?flush():load(false)}});
 window.addEventListener('online',()=>{if(key)flush()});
-if(key)load();else show(false);
+if(key)load(true);else show(false);
 }
 </script>
 </body>
