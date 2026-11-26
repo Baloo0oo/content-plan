@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Posting Plan</title>
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Posting Plan">
+<meta name="theme-color" content="#141414">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#18191b);--panel:light-dark(#f3f3f1,#222326);--ink:light-dark(#141414,#f1f1ef);--mute:light-dark(#5d5d5a,#a9a9a4);--line:light-dark(#dcdcd8,#34353a);--red:#d93a2b;--ok:#2f9e44;
+--LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#555b66;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Cairo,system-ui,sans-serif;overflow-x:clip;padding-top:env(safe-area-inset-top)}
+.band{padding:clamp(22px,4vw,44px) max(5vw,16px)}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0 0 6px;font-weight:800}
+.sub{color:var(--mute);margin:0 0 12px;max-width:64ch}
+#status{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:8px 12px;border-radius:10px;font-size:15px;font-weight:600;background:var(--panel)}
+#status.ok{color:var(--ok)}#status.warn{color:var(--red)}
+button{font-family:inherit}
+.weeks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.weeks button{font:600 15px Cairo,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.weeks button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #2b6cd9;outline-offset:2px}
+.map{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;background:var(--panel);border-radius:14px;padding:10px}
+.daybtn{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:6px;border-radius:10px;min-height:150px}
+.dname{font-weight:800;font-size:15px;line-height:1.1}
+.ddate{font-size:13px;color:var(--mute)}
+.today .dname{color:var(--red)}
+.blk{border-radius:7px;padding:5px 6px;font-size:13px;line-height:1.2;font-weight:600;border:2px solid var(--c);color:var(--ink);overflow-wrap:anywhere}
+.blk.done{background:var(--c);color:#fff}
+.blk.missed{border-style:dashed;text-decoration:line-through;color:var(--mute)}
+.score{display:grid;grid-template-columns:repeat(auto-fit,minmax(8em,1fr));gap:10px;margin-top:14px}
+.score div{background:var(--panel);border-radius:12px;padding:10px 14px}
+.score b{display:block;font-size:clamp(24px,4vw,32px);line-height:1.1;font-weight:800}
+.score span{font-size:13px;color:var(--mute)}
+.reddit{margin-top:18px;border:2px solid var(--REDDIT);border-radius:14px;padding:16px}
+.reddit h2{margin:0 0 4px;font-size:20px;font-weight:800;line-height:1.2}
+.reddit p{margin:4px 0}
+.reddit a{color:var(--REDDIT);font-weight:600}
+.days{display:grid;gap:22px}
+.day h2{font-size:22px;margin:0 0 6px;font-weight:800;line-height:1.2}
+.post{padding:12px 0;border-top:1px solid var(--line)}
+.ph{display:grid;grid-template-columns:5em minmax(0,1fr);gap:12px}
+.time{font-weight:800;font-size:20px;white-space:nowrap;line-height:1.2}
+.chip{display:inline-block;font-size:13px;font-weight:600;color:#fff;background:var(--c);border-radius:6px;padding:1px 8px;margin-inline-end:6px}
+.eff{font-size:13px;color:var(--mute)}
+.topic{margin:4px 0 0;font-weight:600}
+.note{margin:2px 0 0;color:var(--mute);font-size:15px}
+.done .topic{text-decoration:line-through;color:var(--mute)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0 calc(5em + 12px)}
+.acts button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:600;font-size:15px;cursor:pointer}
+.acts button[aria-pressed=true][data-s=done]{background:var(--ok);border-color:var(--ok);color:#fff}
+.acts button[aria-pressed=true][data-s=missed]{background:var(--red);border-color:var(--red);color:#fff}
+.acts button[aria-pressed=true][data-s=moved]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+input{font:16px Cairo,sans-serif;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--ink)}
+.acts .why{flex:1 1 14em}
+.acts .views{width:8em}
+details{margin:8px 0 0 calc(5em + 12px)}
+summary{cursor:pointer;font-weight:600;min-height:32px}
+pre{white-space:pre-wrap;font:17px/1.8 Cairo,sans-serif;background:var(--panel);border-radius:10px;padding:12px;margin:6px 0 0;overflow-x:auto}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.card{background:var(--bg);border-radius:14px;padding:18px}
+.card h3{margin:0 0 8px;font-size:19px;font-weight:800}
+.card ul{margin:0;padding-inline-start:20px}
+.rows{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:7.5em minmax(0,1fr) 4.5em;gap:8px;align-items:center;font-size:15px}
+.track{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--c)}
+.row em{font-style:normal;text-align:right;white-space:nowrap}
+#setup{max-width:560px;background:var(--panel);border-radius:14px;padding:18px}
+#setup h2{margin:0 0 6px;font-size:22px}
+#setup input{width:100%;margin:8px 0}
+.big{min-height:48px;padding:0 20px;border-radius:10px;border:0;background:var(--ink);color:var(--bg);font-weight:800;font-size:16px;cursor:pointer}
+.link{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px;padding:8px 0}
+@media(max-width:600px){.map{grid-template-columns:minmax(0,1fr);gap:2px}.daybtn{min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center}.dname{width:3em}.ddate{width:3.5em}.ph{grid-template-columns:4.2em minmax(0,1fr)}.time{font-size:17px}.acts,details{margin-inline-start:0}}
+</style>
+</head>
+<body>
+<section class="band"><div class="wrap">
+<h1>Posting plan</h1>
+<p class="sub">9 posts a week plus an extra Reddit reel on Sunday, all times Cairo. Every tap is saved online to your private GitHub repo, so your phone and computer always show the same progress.</p>
+<p id="status">Loading…</p>
+<form id="setup" hidden>
+<h2>Connect this device</h2>
+<p>Paste your GitHub key once. It stays on this device only and lets the page read and save your plan in your private repo.</p>
+<label for="key">GitHub key</label>
+<input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+<button class="big" type="submit">Connect</button>
+<p class="note" id="setupmsg"></p>
+</form>
+<div id="app" hidden>
+<div class="weeks" id="weeks"></div>
+<div class="map" id="map"></div>
+<div class="score" id="score"></div>
+<div class="reddit" id="reddit"></div>
+</div>
+</div></section>
+
+<section class="band" style="padding-top:0" id="appdays" hidden><div class="wrap"><div class="days" id="days"></div></div></section>
+
+<section class="band" style="background:var(--panel)" id="appfoot" hidden><div class="wrap cols">
+<div class="card"><h3>Done rate by slot, all weeks</h3><div class="rows" id="slots"></div></div>
+<div class="card"><h3>Saturday filming, about 4.5 hours</h3><ul>
+<li>2 coaching reels, 1 owner reel</li>
+<li>Tuesday's biomech clip, side-on, the whole rep in frame</li>
+<li>Thursday nutrition + Saturday training green screens</li>
+<li>Extra: the Reddit green screen from Friday's pick</li>
+<li>Record the workout; Monday's cool edit is cut from it</li>
+</ul></div>
+<div class="card"><h3>Rules that never move</h3><ul>
+<li>No offer, link or DM keyword in the owner reel</li>
+<li>No steroids, politics, religion, or medical/injury advice</li>
+<li>Never name a coach, or a Reddit user</li>
+<li>TikTok: upload the original file</li>
+</ul><button class="link" type="button" id="forget">Disconnect this device</button></div>
+</div></section>
+
+<script>
+{
+const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/data.json';
+const D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const S={LIFE:'Life edit',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)'};
+const EFF={LIFE:'Very low · cut from workout footage',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker',NUTRITION:'Low-medium · green screen',CAROUSEL:'Medium · 8 slides',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeUrl=u=>typeof u==='string'&&u.startsWith('https://')?u:'';
+const $=id=>document.getElementById(id);
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const dec=b=>new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g,'')),c=>c.charCodeAt(0)));
+const enc=str=>{const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s)};
+let key=ls.get('ghkey'),data={posts:[],reddit:{}},sha=null,cur=null;
+let pending={};try{pending=JSON.parse(ls.get('pending')||'{}')}catch(e){pending={}}
+let saving=false,retryT=null,flushT=null;
+const savePending=()=>ls.set('pending',JSON.stringify(pending));
+const dayDate=(wk,d)=>{const x=new Date(wk+'T12:00:00');x.setDate(x.getDate()+d);return x};
+const fmt=x=>x.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+function status(t,c){const s=$('status');s.textContent=t;s.className=c||''}
+function headers(){return {'Authorization':'Bearer '+key,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}}
+async function fetchData(){
+ const r=await fetch(API,{headers:headers(),cache:'no-store'});
+ if(r.status===401||r.status===403||r.status===404){const e=new Error('key');e.key=true;throw e}
+ if(!r.ok)throw new Error('http '+r.status);
+ const j=await r.json();return {sha:j.sha,data:JSON.parse(dec(j.content))};
+}
+function applyPending(d){for(const id in pending){const p=d.posts.find(x=>x.id===id);if(p)Object.assign(p,pending[id])}return d}
+async function load(){
+ try{const r=await fetchData();sha=r.sha;data=applyPending(r.data);show(true);render();
+  if(Object.keys(pending).length)flush();else status('Saved online ✓ · synced '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'ok');}
+ catch(e){if(e.key){show(false);$('setupmsg').textContent='That key could not open your plan. Check it can read and write the content-plan-data repo.'}else{status('Offline: can’t reach GitHub. Your taps will save when you’re back online.','warn')}}
+}
+async function flush(){
+ if(saving||!Object.keys(pending).length)return;
+ saving=true;clearTimeout(retryT);status('Saving online…');
+ const batch=JSON.parse(JSON.stringify(pending));
+ try{
+  for(let attempt=0;attempt<4;attempt++){
+   const r=await fetchData();const d=r.data;
+   for(const id in batch){const p=d.posts.find(x=>x.id===id);if(p)Object.assign(p,batch[id])}
+   d.updated=new Date().toISOString();
+   const put=await fetch(API,{method:'PUT',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({message:'Tracker: '+Object.keys(batch).join(', '),content:enc(JSON.stringify(d,null,1)),sha:r.sha})});
+   if(put.ok){const j=await put.json();sha=j.content.sha;
+    for(const id in batch){if(JSON.stringify(pending[id])===JSON.stringify(batch[id]))delete pending[id]}
+    savePending();data=applyPending(d);render();saving=false;
+    status('Saved online ✓ · '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),'ok');
+    if(Object.keys(pending).length)flush();return}
+   if(put.status!==409&&put.status!==422)throw new Error('http '+put.status);
+  }
+  throw new Error('conflict');
+ }catch(e){saving=false;status('Not saved online yet. Retrying… (keep this page open or reopen it later)','warn');retryT=setTimeout(flush,15000)}
+}
+function change(id,fields){
+ const p=data.posts.find(x=>x.id===id);if(!p)return;
+ Object.assign(p,fields);pending[id]={...(pending[id]||{}),...fields};savePending();render();
+ status('Saving online…');clearTimeout(flushT);flushT=setTimeout(flush,700);
+}
+function show(on){$('setup').hidden=on;$('app').hidden=!on;$('appdays').hidden=!on;$('appfoot').hidden=!on;if(!on)status('Not connected','warn')}
+function weeks(){return [...new Set(data.posts.map(p=>p.week))].sort()}
+function render(){
+ const ws=weeks();
+ if(!cur||!ws.includes(cur)){const now=new Date();cur=ws.find(w=>now>=dayDate(w,0)&&now<dayDate(w,7))||ws.find(w=>dayDate(w,0)>now)||ws[ws.length-1]||null}
+ if(!cur){$('days').innerHTML='<p>No plan yet.</p>';return}
+ const ps=data.posts.filter(p=>p.week===cur).sort((a,b)=>a.order-b.order);
+ const todayKey=new Date().toDateString();
+ $('weeks').innerHTML=ws.map((w,i)=>`<button type="button" data-w="${esc(w)}" aria-pressed="${w===cur}">Week ${i+1} · ${fmt(dayDate(w,0))}</button>`).join('');
+ $('map').innerHTML=D.map((n,d)=>{const dt=dayDate(cur,d);return `<button type="button" class="daybtn${dt.toDateString()===todayKey?' today':''}" data-d="${d}"><span class="dname">${n}</span><span class="ddate">${fmt(dt)}</span>${ps.filter(p=>p.day===d).map(p=>`<span class="blk ${esc(p.status||'')}" style="--c:var(--${esc(p.slot)})">${esc(p.time)} ${esc(S[p.slot]||p.slot)}</span>`).join('')}</button>`}).join('');
+ const c=k=>ps.filter(p=>p.status===k).length;
+ $('score').innerHTML=`<div><b>${c('done')}/${ps.length}</b><span>done this week</span></div><div><b>${c('missed')}</b><span>missed</span></div><div><b>${c('moved')}</b><span>moved</span></div><div><b>${ps.length-c('done')-c('missed')-c('moved')}</b><span>still to post</span></div>`;
+ const r=(data.reddit||{})[cur];
+ $('reddit').innerHTML=r?`<h2>Reddit this week: ${esc(r.topic)}</h2><p>${esc(r.sub)} · ${esc(r.comments)} comments${safeUrl(r.url)?` · <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">open the post</a>`:''}</p><p>${esc(r.angle)}</p>${r.backup?`<p class="note">Backup: ${esc(r.backup)}</p>`:''}<p class="note">Updated ${esc(r.updated||'')}</p>`:'<h2>Reddit this week</h2><p class="note">Not picked yet. The update runs on Friday morning.</p>';
+ $('days').innerHTML=D.map((n,d)=>`<div class="day" id="day${d}"><h2>${n} ${fmt(dayDate(cur,d))}</h2>${ps.filter(p=>p.day===d).map(p=>`<div class="post ${esc(p.status||'')}"><div class="ph"><span class="time">${esc(p.time)}</span><div><span class="chip" style="--c:var(--${esc(p.slot)})">${esc(S[p.slot]||p.slot)}</span><span class="eff">${esc(EFF[p.slot]||'')}</span><p class="topic">${esc(p.topic)}</p>${p.note?`<p class="note">${esc(p.note)}</p>`:''}</div></div>
+<div class="acts">${['done','missed','moved'].map(s=>`<button type="button" data-id="${esc(p.id)}" data-s="${s}" aria-pressed="${p.status===s}">${s==='done'?'Done':s==='missed'?'Missed':'Moved'}</button>`).join('')}
+${p.status==='missed'||p.status==='moved'?`<input class="why" id="why-${esc(p.id)}" data-id="${esc(p.id)}" data-f="why" placeholder="Why? (optional)" value="${esc(p.why||'')}">`:''}
+${p.status==='done'?`<input class="views" id="views-${esc(p.id)}" data-id="${esc(p.id)}" data-f="views" inputmode="numeric" placeholder="Views" value="${esc(p.views||'')}">`:''}</div>
+${p.script?`<details><summary>Script</summary><pre dir="rtl">${esc(p.script)}</pre></details>`:''}</div>`).join('')}</div>`).join('');
+ const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.status){b.n++;if(p.status==='done')b.d++}});
+ $('slots').innerHTML=Object.keys(S).map(k=>{const b=by[k]||{n:0,d:0};const pc=b.n?Math.round(b.d/b.n*100):0;return `<div class="row" style="--c:var(--${k})"><span>${S[k]}</span><span class="track"><i style="width:${pc}%"></i></span><em>${b.n?pc+'%':'–'}</em></div>`}).join('');
+}
+$('weeks').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cur=b.dataset.w;render()});
+$('map').addEventListener('click',e=>{const b=e.target.closest('.daybtn');if(b)$('day'+b.dataset.d).scrollIntoView({behavior:'smooth'})});
+$('days').addEventListener('click',e=>{const b=e.target.closest('button[data-s]');if(!b)return;const p=data.posts.find(x=>x.id===b.dataset.id);if(p)change(p.id,{status:p.status===b.dataset.s?'':b.dataset.s})});
+$('days').addEventListener('change',e=>{const i=e.target.closest('input[data-f]');if(!i)return;const p=data.posts.find(x=>x.id===i.dataset.id);const v=i.value.trim();if(p&&(p[i.dataset.f]||'')!==v)change(p.id,{[i.dataset.f]:v})});
+$('setup').addEventListener('submit',e=>{e.preventDefault();const k=$('key').value.trim();if(!k)return;key=k;ls.set('ghkey',k);$('setupmsg').textContent='Connecting…';load()});
+$('forget').addEventListener('click',()=>{ls.del('ghkey');key=null;show(false)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&key&&!saving){Object.keys(pending).length?flush():load()}});
+window.addEventListener('online',()=>{if(key)flush()});
+if(key)load();else show(false);
+}
+</script>
+</body>
+</html>
