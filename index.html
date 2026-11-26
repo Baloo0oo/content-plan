@@ -295,10 +295,16 @@ const filmsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot==='FILM'
 const byId=id=>data.posts.find(p=>p.id===id);
 function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
 function kv(k,v){return v?`<div><p class="k">${esc(k)}</p><p>${v}</p></div>`:''}
+function extra(p){if(!p)return '';let h='';
+ if(p.onscreen)h+=`<div><p class="k">On screen (one card per line)</p><pre dir="rtl">${esc(p.onscreen.split(' | ').join('\n'))}</pre></div>`;
+ if(p.shows)h+=kv('What the video shows',esc(p.shows));
+ if(p.source_screen)h+=`<div><p class="k">Source on screen</p><pre dir="rtl">${esc(p.source_screen.split(' | ').join('\n'))}</pre></div>`;
+ if(p.source_caption)h+=kv('Source for the caption',esc(p.source_caption));
+ return h}
 function postCard(p){
  const car=p.carousel?(data.carousels||[]).find(c=>c.id===p.carousel):null;
  const r=p.slot==='REDDIT'?(data.reddit||{})[p.week]:null;
- let inner=kv('What',esc(EFF[p.slot]||''))+kv('Notes',esc(p.note||''));
+ let inner=kv('What',esc(EFF[p.slot]||''))+kv('Notes',esc(p.note||''))+extra(p);
  if(r){const u=safeUrl(r.url);inner+=kv('Reddit post',`${esc(r.topic)} · ${esc(r.sub)} · ${esc(r.comments)} comments${u?` · <a href="${esc(u)}" target="_blank" rel="noopener">open</a>`:''}`)+kv('Angle',esc(r.angle||''))}
  if(car&&car.status==='ready')inner+=`<div><p class="k">Slides</p><div class="slides" id="ps-${esc(p.id)}" data-car="${esc(car.id)}"></div><p class="mut">Save all at once, or press and hold one slide to save just that one.</p><button class="big" type="button" data-saveall="${esc(car.id)}" style="margin-top:6px">Save all slides</button><p class="mut" id="sa-${esc(car.id)}-p"></p></div>`;
  if(p.script)inner+=`<div><p class="k">${p.slot==='CAROUSEL'?'Caption':'Script'}</p><pre dir="rtl">${esc(p.script)}</pre><button class="copy" type="button" data-copyp="${esc(p.id)}">Copy</button></div>`;
@@ -314,7 +320,7 @@ function filmCard(w,d,fs){
  const groups=[];fs.forEach(f=>{const g=f.where||'Filming';let x=groups.find(y=>y.g===g);if(!x)groups.push(x={g,items:[]});x.items.push(f)});
  const item=f=>{const t=f.for?byId(f.for):null;
   let inner=kv('For',t?`${esc(S[t.slot]||t.slot)} · ${esc(fmt(dayDate(t.week,t.day)))}, ${esc(t.time)}`:'')+kv('How',esc(f.note||''));
-  if(t&&t.note)inner+=kv('Post notes',esc(t.note));
+  if(t&&t.note)inner+=kv('Post notes',esc(t.note));inner+=extra(t);
   if(t&&t.script)inner+=`<div><p class="k">${t.slot==='LIFE'?'Talking points':'Script'}</p><pre dir="rtl">${esc(t.script)}</pre></div>`;
   else if(t&&t.slot!=='WORKOUT'&&t.slot!=='CAROUSEL')inner+=`<p class="mut">No script yet for this one.</p>`;
   return `<div class="fi ${f.status==='done'?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" id="fb-${esc(f.id)}" data-film="${esc(f.id)}" aria-checked="${f.status==='done'}" aria-label="Filmed: ${esc(f.topic)}">✓</button><span class="ft">${esc(f.topic)}</span></div>${det('f:'+f.id,'Details',inner)}</div>`};
