@@ -145,6 +145,7 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 <button role="tab" data-tab="today" aria-selected="true" id="t-today"><b>●</b>Today</button>
 <button role="tab" data-tab="week" aria-selected="false" id="t-week"><b>▦</b>Week</button>
 <button role="tab" data-tab="car" aria-selected="false" id="t-car"><b>▤</b>Carousels</button>
+<button role="tab" data-tab="scripts" aria-selected="false" id="t-scripts"><b>✎</b>Owners</button>
 <button role="tab" data-tab="stats" aria-selected="false" id="t-stats"><b>▲</b>Stats</button>
 </nav>
 <div class="wrap">
@@ -191,6 +192,11 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 </form></div>
 <div class="card"><h3 style="margin:0 0 4px">Your carousels</h3><div id="carlist"></div></div>
 </div></section>
+
+<section class="view" id="v-scripts" hidden>
+<p class="mut" style="margin:4px 0 10px">All 24 gym-owner reels, one every Wednesday at 9 PM (9:30 PM in Ramadan). No offer, link, price or DM keyword in any of them.</p>
+<div id="owners"></div>
+</section>
 
 <section class="view" id="v-stats" hidden><div class="grid2">
 <div><div class="tiles" id="tiles"></div><div class="card"><h3 style="margin:0 0 8px">Done rate by type, all weeks</h3><div class="rows" id="slots"></div></div></div>
@@ -349,7 +355,7 @@ function render(){
  $('hdate').textContent=`${DL[sel]} ${fmt(dayDate(cur,sel))}${td?' · today':''}`;
  const left=ps.filter(p=>!p.status).length,fl=fs.filter(f=>f.status!=='done').length;
  const sc0=storyOf(cur,sel);
- $('htitle').textContent=tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}${sc0?', stories '+frDone(sc0)+'/'+(sc0.frames||[]).length:''}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
+ $('htitle').textContent=tab==='scripts'?'Gym-owner reels':tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}${sc0?', stories '+frDone(sc0)+'/'+(sc0.frames||[]).length:''}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
  $('strip').innerHTML=D.map((n,d)=>{const p=postsOf(cur,d),f=filmsOf(cur,d);const dots=[];
   if(p.length&&p.every(x=>x.status==='done'))dots.push('var(--ok)');else if(p.some(x=>x.status==='missed'))dots.push('var(--red)');
   if(f.length)dots.push(f.every(x=>x.status==='done')?'var(--ok)':'var(--FILM)');
@@ -366,8 +372,19 @@ function render(){
  agenda(cur,'sideweek');agenda(cur,'week');
  const r=(data.reddit||{})[cur];
  $('redditbox').innerHTML=r?`<div class="reddit"><h3>Reddit this week: ${esc(r.topic)}</h3><p class="mut">${esc(r.sub)} · ${esc(r.comments)} comments${safeUrl(r.url)?` · <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">open the post</a>`:''}</p><p>${esc(r.angle)}</p>${r.backup?`<p class="mut">Backup: ${esc(r.backup)}</p>`:''}</div>`:'';
- renderCars();renderStats();
+ renderCars();renderStats();renderOwners();
  document.querySelectorAll('.slides[data-car]').forEach(box=>{const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);const d=box.closest('details');if(c&&d&&d.open)loadSlides(c,box)});
+}
+function renderOwners(){
+ const list=data.ownerScripts||[];const today=new Date();today.setHours(0,0,0,0);
+ const post=n=>data.posts.find(p=>p.slot==='OWNER'&&new RegExp('^Owner #'+n+'\\b').test(p.topic||''));
+ $('owners').innerHTML=list.length?list.map(r=>{const d=new Date(r.date+'T12:00:00');const pp=post(r.n);const st=pp&&pp.status==='done'?'Posted ✓':d<today?'Past date':'';
+  let inner=kv('One idea',`<span dir="rtl">${esc(r.idea)}</span>`)+`<div><p class="k">Script</p><pre dir="rtl">${esc(r.script)}</pre><button class="copy" type="button" data-copyo="${r.n}|script">Copy script</button></div>`
+   +`<div><p class="k">On screen</p><pre dir="rtl">${esc((r.onscreen||'').split(' | ').join('\n'))}</pre><button class="copy" type="button" data-copyo="${r.n}|onscreen">Copy on-screen text</button></div>`
+   +kv('Shows',esc(r.shows))+(r.source_screen?kv('Source on screen',`<span dir="rtl">${esc(r.source_screen)}</span>`):'')
+   +(r.source_caption?`<div><p class="k">Source for the caption</p><p>${esc(r.source_caption)}</p><button class="copy" type="button" data-copyo="${r.n}|source_caption">Copy source</button></div>`:'')
+   +kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
+  return `<div class="card ${pp&&pp.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${r.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(r.time)}</span>${st?`<span class="tag" style="--c:${st==='Posted ✓'?'var(--ok)':'#5f6672'}">${esc(st)}</span>`:''}</div><h3>${esc(r.title)}</h3>${det('o:'+r.n,'Script and details',inner)}</div>`}).join(''):'<p class="mut">No owner scripts.</p>';
 }
 function renderStats(){
  const wk=data.posts.filter(p=>p.week===cur);const ps=wk.filter(p=>p.slot!=='FILM'&&p.slot!=='STORY'),fs=wk.filter(p=>p.slot==='FILM'),ss=wk.filter(p=>p.slot==='STORY');const c=k=>ps.filter(p=>p.status===k).length;
@@ -419,6 +436,7 @@ document.addEventListener('click',async e=>{
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
  const sa=e.target.closest('button[data-saveall]');if(sa){saveAll(sa);return}
  const ca=e.target.closest('button[data-copya]');if(ca){const c=(data.carousels||[]).find(x=>x.id===ca.dataset.copya);try{await navigator.clipboard.writeText((c&&c.alt)||'');ca.textContent='Copied ✓'}catch(err){ca.textContent='Copy failed'}return}
+ const co=e.target.closest('button[data-copyo]');if(co){const [n,f]=co.dataset.copyo.split('|');const r=(data.ownerScripts||[]).find(x=>String(x.n)===n);let txt=r?r[f]||'':'';if(f==='onscreen')txt=txt.split(' | ').join('\n');try{await navigator.clipboard.writeText(txt);co.textContent='Copied ✓'}catch(err){co.textContent='Copy failed: select the text instead'}return}
  const ct=e.target.closest('button[data-copyt]');if(ct){const [sid,i]=ct.dataset.copyt.split('|');const s=byId(sid);const f=s&&s.frames?s.frames[+i]:null;try{await navigator.clipboard.writeText((f&&f.text)||'');ct.textContent='Copied ✓'}catch(err){ct.textContent='Copy failed: select the text instead'}return}
  const cp=e.target.closest('button[data-copyp],button[data-copyc]');if(cp){const txt=cp.dataset.copyp?(byId(cp.dataset.copyp)||{}).script:((data.carousels||[]).find(c=>c.id===cp.dataset.copyc)||{}).caption;try{await navigator.clipboard.writeText(txt||'');cp.textContent='Copied ✓'}catch(err){cp.textContent='Copy failed: select the text instead'}return}
  const ch=e.target.closest('button[data-chg]');if(ch){const id=ch.dataset.chg;const txt=($('chg-'+id).value||'').trim();if(!txt)return;ch.disabled=true;ch.textContent='Sending…';
