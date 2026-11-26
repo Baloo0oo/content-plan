@@ -196,9 +196,10 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 <div><div class="tiles" id="tiles"></div><div class="card"><h3 style="margin:0 0 8px">Done rate by type, all weeks</h3><div class="rows" id="slots"></div></div></div>
 <div>
 <div class="card"><h3 style="margin:0 0 4px">Filming days</h3><ul>
-<li><b>Friday after Jumu’ah, at home (about 2 h):</b> next week’s talking reels and green screens, the carousel slides, and this week’s Reddit reel</li>
-<li><b>Stories every day:</b> 3–5 frames, Q&A box opens Monday, answers on Thursday</li>
-<li><b>Saturday at the gym (about 2 h):</b> next week’s 2 biomech clips, your full workout, and clips for Monday’s life edit</li></ul></div>
+<li><b>Thursday evening, at home (about 1 h):</b> next week’s 2 coaching reels and the owner reel, and a look at the carousel</li>
+<li><b>Friday after Jumu’ah (about 1.5 h):</b> the talking life video outside (or at home), then at home the nutrition and training green screens and this week’s Reddit reel</li>
+<li><b>Saturday at the gym (about 2 h):</b> next week’s 2 biomech clips, your full workout, and b-roll</li>
+<li><b>Stories every day:</b> 3–5 frames, Q&A box opens Monday, answers on Thursday</li></ul></div>
 <div class="card"><h3 style="margin:0 0 4px">Rules that never move</h3><ul>
 <li>No offer, link or DM keyword in the owner reel</li>
 <li>No steroids, politics, religion, or medical/injury advice</li>
@@ -213,8 +214,8 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/';
 const D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const DL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const S={LIFE:'Life edit',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming',STORY:'Stories'};
-const EFF={LIFE:'Very low · cut from workout footage',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker with Claude',NUTRITION:'Low-medium · green screen',CAROUSEL:'Made by the carousel maker',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
+const S={LIFE:'Life video',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming',STORY:'Stories'};
+const EFF={LIFE:'Talking video, outside or at home',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker with Claude',NUTRITION:'Low-medium · green screen',CAROUSEL:'Made by the carousel maker',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl=u=>typeof u==='string'&&u.startsWith('https://')?u:'';
 const $=id=>document.getElementById(id);
@@ -303,13 +304,15 @@ ${det('p:'+p.id,'Details',inner)}</div>`;
 }
 function filmCard(w,d,fs){
  const left=fs.filter(f=>f.status!=='done').length;
- const where=d===4?'Friday after Jumu’ah, at home':d===5?'Saturday at the gym':'Filming';
- return `<div class="film"><h3>To film: ${left?left+' left':'all done ✓'}</h3><p class="mut" style="margin:0 0 6px">${esc(where)} · about 2 h</p>${fs.map(f=>{const t=f.for?byId(f.for):null;
+ const PL={'Home':'At home','Outside or home':'Outside (or at home)','Gym':'At the gym'};
+ const groups=[];fs.forEach(f=>{const g=f.where||'Filming';let x=groups.find(y=>y.g===g);if(!x)groups.push(x={g,items:[]});x.items.push(f)});
+ const item=f=>{const t=f.for?byId(f.for):null;
   let inner=kv('For',t?`${esc(S[t.slot]||t.slot)} · ${esc(fmt(dayDate(t.week,t.day)))}, ${esc(t.time)}`:'')+kv('How',esc(f.note||''));
   if(t&&t.note)inner+=kv('Post notes',esc(t.note));
-  if(t&&t.script)inner+=`<div><p class="k">Script</p><pre dir="rtl">${esc(t.script)}</pre></div>`;
-  else if(t&&t.slot!=='WORKOUT'&&t.slot!=='LIFE')inner+=`<p class="mut">No script yet for this one.</p>`;
-  return `<div class="fi ${f.status==='done'?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" id="fb-${esc(f.id)}" data-film="${esc(f.id)}" aria-checked="${f.status==='done'}" aria-label="Filmed: ${esc(f.topic)}">✓</button><span class="ft">${esc(f.topic)}</span></div>${det('f:'+f.id,'Details',inner)}</div>`}).join('')}</div>`;
+  if(t&&t.script)inner+=`<div><p class="k">${t.slot==='LIFE'?'Talking points':'Script'}</p><pre dir="rtl">${esc(t.script)}</pre></div>`;
+  else if(t&&t.slot!=='WORKOUT'&&t.slot!=='CAROUSEL')inner+=`<p class="mut">No script yet for this one.</p>`;
+  return `<div class="fi ${f.status==='done'?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" id="fb-${esc(f.id)}" data-film="${esc(f.id)}" aria-checked="${f.status==='done'}" aria-label="Filmed: ${esc(f.topic)}">✓</button><span class="ft">${esc(f.topic)}</span></div>${det('f:'+f.id,'Details',inner)}</div>`};
+ return `<div class="film"><h3>To film: ${left?left+' left':'all done ✓'}</h3>${groups.map(x=>`<p class="k" style="margin:10px 0 2px;font-size:13px;color:var(--ink)">${esc(PL[x.g]||x.g)} · ${x.items.filter(f=>f.status!=='done').length} left</p>${x.items.map(item).join('')}`).join('')}</div>`;
 }
 function storyCard(s){
  const fr=s.frames||[],dn=s.framesDone||[];const n=frDone(s);
@@ -320,7 +323,7 @@ function storyCard(s){
   inner+=kv('Sticker',esc(f.sticker||''))+kv('Music',esc(f.music||''))+kv('Tip',esc(f.tip||''));
   return {title:f.title||('Frame '+(i+1)),inner};
  };
- return `<div class="story"><h3>${esc(s.topic&&s.topic!=='Stories'?'Stories · '+s.topic:'Stories')}: ${n}/${fr.length}</h3><p class="mut" style="margin:0 0 6px">${esc(s.note||'')}</p>${fr.map((f,i)=>{const o=one(f,i);return `<div class="fi ${dn.includes(i)?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-frame="${esc(s.id)}" data-i="${i}" aria-checked="${dn.includes(i)}" aria-label="Story frame ${i+1}">✓</button><span class="ft" dir="auto">${i+1}. ${esc(o.title)}</span></div>${o.inner?det('s:'+s.id+':'+i,'How to do it',o.inner):''}</div>`}).join('')}</div>`;
+ return `<div class="story"><h3>${esc(s.topic&&s.topic!=='Stories'?'Stories · '+s.topic:'Stories')}: ${n}/${fr.length}</h3><p class="mut" style="margin:0 0 6px">${esc(s.note||'')}</p>${fr.map((f,i)=>{const o=one(f,i);return `<div class="fi ${dn.includes(i)?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-frame="${esc(s.id)}" data-i="${i}" aria-checked="${dn.includes(i)}" aria-label="Story frame ${i+1}">✓</button><span class="ft" dir="auto">${i+1}. ${esc(o.title)}</span></div>${o.inner?det('s:'+s.id+':'+i,'Details',o.inner):''}</div>`}).join('')}</div>`;
 }
 function nextFilming(){
  const now=new Date();now.setHours(0,0,0,0);
