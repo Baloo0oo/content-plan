@@ -313,7 +313,14 @@ function filmCard(w,d,fs){
 }
 function storyCard(s){
  const fr=s.frames||[],dn=s.framesDone||[];const n=frDone(s);
- return `<div class="story"><h3>${esc(s.topic&&s.topic!=='Stories'?'Stories · '+s.topic:'Stories')}: ${n}/${fr.length}</h3><p class="mut" style="margin:0 0 6px">${esc(s.note||'')}</p>${fr.map((f,i)=>`<div class="fi ${dn.includes(i)?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-frame="${esc(s.id)}" data-i="${i}" aria-checked="${dn.includes(i)}" aria-label="Story frame ${i+1}">✓</button><span class="ft" dir="auto">${esc(f)}</span></div></div>`).join('')}</div>`;
+ const one=(f,i)=>{
+  if(typeof f==='string')return {title:f,inner:''};
+  let inner=kv('What to do',esc(f.do||''));
+  if(f.text)inner+=`<div><p class="k">Write on the story</p><pre dir="rtl">${esc(f.text)}</pre><button class="copy" type="button" data-copyt="${esc(s.id)}|${i}">Copy text</button></div>`;
+  inner+=kv('Sticker',esc(f.sticker||''))+kv('Music',esc(f.music||''))+kv('Tip',esc(f.tip||''));
+  return {title:f.title||('Frame '+(i+1)),inner};
+ };
+ return `<div class="story"><h3>${esc(s.topic&&s.topic!=='Stories'?'Stories · '+s.topic:'Stories')}: ${n}/${fr.length}</h3><p class="mut" style="margin:0 0 6px">${esc(s.note||'')}</p>${fr.map((f,i)=>{const o=one(f,i);return `<div class="fi ${dn.includes(i)?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-frame="${esc(s.id)}" data-i="${i}" aria-checked="${dn.includes(i)}" aria-label="Story frame ${i+1}">✓</button><span class="ft" dir="auto">${i+1}. ${esc(o.title)}</span></div>${o.inner?det('s:'+s.id+':'+i,'How to do it',o.inner):''}</div>`}).join('')}</div>`;
 }
 function nextFilming(){
  const now=new Date();now.setHours(0,0,0,0);
@@ -394,6 +401,7 @@ document.addEventListener('click',async e=>{
  const s=e.target.closest('button[data-s]');if(s){const p=byId(s.dataset.id);if(p)change(p.id,{status:p.status===s.dataset.s?'':s.dataset.s});return}
  const fb=e.target.closest('button[data-frame]');if(fb){const p=byId(fb.dataset.frame);if(p){const i=+fb.dataset.i;const dn=(p.framesDone||[]).slice();const k=dn.indexOf(i);if(k>=0)dn.splice(k,1);else dn.push(i);dn.sort((a,b)=>a-b);change(p.id,{framesDone:dn,status:dn.length===(p.frames||[]).length?'done':''})}return}
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
+ const ct=e.target.closest('button[data-copyt]');if(ct){const [sid,i]=ct.dataset.copyt.split('|');const s=byId(sid);const f=s&&s.frames?s.frames[+i]:null;try{await navigator.clipboard.writeText((f&&f.text)||'');ct.textContent='Copied ✓'}catch(err){ct.textContent='Copy failed: select the text instead'}return}
  const cp=e.target.closest('button[data-copyp],button[data-copyc]');if(cp){const txt=cp.dataset.copyp?(byId(cp.dataset.copyp)||{}).script:((data.carousels||[]).find(c=>c.id===cp.dataset.copyc)||{}).caption;try{await navigator.clipboard.writeText(txt||'');cp.textContent='Copied ✓'}catch(err){cp.textContent='Copy failed: select the text instead'}return}
  const ch=e.target.closest('button[data-chg]');if(ch){const id=ch.dataset.chg;const txt=($('chg-'+id).value||'').trim();if(!txt)return;ch.disabled=true;ch.textContent='Sending…';
   try{await mutate(d=>{const c=(d.carousels||[]).find(x=>x.id===id);if(c){c.changes=txt;c.status='queued'}},'Carousel changes: '+id);status('Changes saved online ✓ · Claude remakes it within the hour','ok')}catch(err){ch.disabled=false;ch.textContent='Not sent. Try again'}}
