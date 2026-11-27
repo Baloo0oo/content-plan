@@ -196,15 +196,13 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 
 <section class="view" id="v-scripts" hidden>
 <h2 style="margin:6px 0 2px;font-size:20px">Coach's corner → course launch</h2>
-<p class="mut" style="margin:0 0 10px">One reel every Wednesday at 6 PM for coaches and people who want to become coaches. Value first, then teasers from 24 Mar, launch on Wed 14 Apr 2027.</p>
+<p class="mut" style="margin:0 0 10px">One reel every Wednesday at 9 PM for coaches and people who want to become coaches. Value first, then teasers from 24 Mar, launch on Wed 14 Apr 2027.</p>
 <div id="coachseries"></div>
-<h2 style="margin:18px 0 2px;font-size:20px">Gym-owner reels</h2>
-<p class="mut" style="margin:0 0 10px">All 24, one every Wednesday at 9 PM (9:30 PM in Ramadan). No offer, link, price or DM keyword in any of them.</p>
-<div id="owners"></div>
+<div id="owners" hidden></div>
 </section>
 
 <section class="view" id="v-stats" hidden><div class="grid2">
-<div><div class="tiles" id="tiles"></div><div class="card"><h3 style="margin:0 0 8px">Done rate by type, all weeks</h3><div class="rows" id="slots"></div></div></div>
+<div><div class="tiles" id="tiles"></div><div class="card"><h3 style="margin:0 0 6px">Profile and funnel setup</h3><div id="setuplist"></div></div><div class="card"><h3 style="margin:0 0 6px">Best posts by saves + shares</h3><div id="toplist"></div></div><div class="card"><h3 style="margin:0 0 8px">Done rate by type, all weeks</h3><div class="rows" id="slots"></div></div></div>
 <div>
 <div class="card"><h3 style="margin:0 0 4px">Filming days</h3><ul>
 <li><b>Thursday evening, at home (about 1 h):</b> next week’s 2 coaching reels and the owner reel, and a look at the carousel</li>
@@ -318,8 +316,9 @@ function postCard(p){
  if(car&&car.status==='ready')inner+=`<div><p class="k">Slides</p><div class="slides" id="ps-${esc(p.id)}" data-car="${esc(car.id)}"></div><p class="mut">Save all at once, or press and hold one slide to save just that one.</p><button class="big" type="button" data-saveall="${esc(car.id)}" style="margin-top:6px">Save all slides</button><p class="mut" id="sa-${esc(car.id)}-p"></p></div>`;
  if(p.script)inner+=`<div><p class="k">${p.slot==='CAROUSEL'?'Caption':'Script'}</p><pre dir="rtl">${esc(p.script)}</pre><button class="copy" type="button" data-copyp="${esc(p.id)}">Copy</button></div>`;
  if(p.status==='missed'||p.status==='moved')inner+=`<div><p class="k">Why?</p><input class="inp" id="why-${esc(p.id)}" data-id="${esc(p.id)}" data-f="why" placeholder="Optional" value="${esc(p.why||'')}"></div>`;
- if(p.status==='done')inner+=`<div><p class="k">Views</p><input class="inp" id="views-${esc(p.id)}" data-id="${esc(p.id)}" data-f="views" inputmode="numeric" placeholder="Add later" value="${esc(p.views||'')}"></div>`;
- return `<div class="card ${p.status==='done'?'done':''}" id="c-${esc(p.id)}"><div class="ct"><span class="time">${esc(p.time)}</span><span class="tag" style="--c:var(--${esc(p.slot)})">${esc(S[p.slot]||p.slot)}</span></div><h3>${esc(p.topic)}</h3>
+ if(p.status==='done'){inner+=`<div><p class="k">Results after 48 hours</p><div class="two">${[['views','Views'],['saves','Saves'],['shares','Shares'],['follows','Follows']].map(([f,l])=>`<label style="font-size:13px;color:var(--mute)">${l}<input class="inp" id="${f}-${esc(p.id)}" data-id="${esc(p.id)}" data-f="${f}" inputmode="numeric" value="${esc(p[f]||'')}"></label>`).join('')}</div></div>`;
+  if(p.slot!=='CAROUSEL')inner+=`<div><button type="button" class="btns" style="all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-height:44px;font-weight:700" data-shorts="${esc(p.id)}"><span class="box" aria-hidden="true" style="display:inline-grid;place-items:center;color:${p.shorts?'#fff':'transparent'};background:${p.shorts?'var(--ok)':'transparent'};border-color:${p.shorts?'var(--ok)':'#5a5b60'}">✓</span>Also posted to YouTube Shorts</button><p class="mut" style="margin:0">Post every reel that beats your average there (and on TikTok).</p></div>`}
+ return `<div class="card ${p.status==='done'?'done':''}" id="c-${esc(p.id)}"><div class="ct"><span class="time">${esc(p.time)}</span><span class="tag" style="--c:var(--${esc(p.slot)})">${esc(S[p.slot]||p.slot)}</span></div>${p.series?`<p class="mut" style="margin:6px 0 0;font-weight:700">${esc(p.series)}${p.optional?' · optional':''}</p>`:''}<h3>${esc(p.topic)}</h3>
 <div class="btns">${['done','missed','moved'].map(s=>`<button type="button" data-id="${esc(p.id)}" data-s="${s}" aria-pressed="${p.status===s}">${s==='done'?(p.status==='done'?'Done ✓':'Done'):s==='missed'?'Missed':'Moved'}</button>`).join('')}</div>
 ${det('p:'+p.id,'Details',inner)}</div>`;
 }
@@ -407,7 +406,20 @@ function renderOwners(){
    +ideasBlock(r.onscreen,r.bg_ideas)+kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
   return `<div class="card ${pp&&pp.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${r.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(r.time)}</span>${st?`<span class="tag" style="--c:${st==='Posted ✓'?'var(--ok)':'#5f6672'}">${esc(st)}</span>`:''}</div><h3>${esc(r.title)}</h3>${det('o:'+r.n,'Script and details',inner)}</div>`}).join(''):'<p class="mut">No owner scripts.</p>';
 }
-function renderStats(){
+const SETUP=[
+ ['bio','Bio','«بفهمك التمرين بالبيوميكانيكس · أونلاين كوتشينج · ابدأ معايا ⬇️» + your link'],
+ ['pins','Pin 3 posts','Your best Iron physics reel, your best Real result, a Form check'],
+ ['highlights','Highlights','Coaching · Results · Form checks · Q&A'],
+ ['dm','DM keyword','Comment «كوتش» → automatic DM with the coaching link (Instagram auto-replies or ManyChat)'],
+ ['waitlist','Course waitlist form','Needed by Wed 13 Jan (Coach\'s corner #7 starts mentioning it)'],
+ ['youtube','YouTube channel for Shorts','Same handle; upload every reel that beats your average'],
+ ['tiktok','TikTok','All reels + your full workouts (full workouts live there only)'],
+ ['covers','Series covers','One cover style per series name so the grid shows the series'],
+];
+function renderSetup(){const s=data.setup||{};$('setuplist').innerHTML=SETUP.map(([k,l,h])=>`<div class="fi ${s[k]?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-setup="${k}" aria-checked="${!!s[k]}" aria-label="${esc(l)}">✓</button><span class="ft">${esc(l)}<br><span class="mut" dir="auto" style="font-weight:400">${esc(h)}</span></span></div></div>`).join('')}
+function renderTop(){const n=v=>parseInt(String(v||'').replace(/\D/g,''))||0;const L=data.posts.filter(p=>p.status==='done'&&p.slot!=='FILM'&&p.slot!=='STORY').map(p=>({p,sc:n(p.saves)+n(p.shares)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,5);
+ $('toplist').innerHTML=L.length?L.map(x=>`<p style="margin:6px 0"><b>${x.sc}</b> · ${esc(x.p.series||S[x.p.slot]||'')} · ${esc(x.p.topic)}</p>`).join(''):'<p class="mut">Fill in saves and shares on posted reels (Details) and your best posts show up here.</p>'}
+function renderStats(){renderSetup();renderTop();
  const wk=data.posts.filter(p=>p.week===cur);const ps=wk.filter(p=>p.slot!=='FILM'&&p.slot!=='STORY'),fs=wk.filter(p=>p.slot==='FILM'),ss=wk.filter(p=>p.slot==='STORY');const c=k=>ps.filter(p=>p.status===k).length;
  $('tiles').innerHTML=`<div><b>${c('done')}/${ps.length}</b><span class="mut">posted this week</span></div><div><b>${c('missed')}</b><span class="mut">missed</span></div><div><b>${c('moved')}</b><span class="mut">moved</span></div><div><b>${fs.filter(f=>f.status==='done').length}/${fs.length}</b><span class="mut">filmed</span></div><div><b>${ss.filter(s=>frDone(s)&&frDone(s)===(s.frames||[]).length).length}/${ss.length}</b><span class="mut">story days done</span></div>`;
  const by={};data.posts.forEach(p=>{const b=by[p.slot]||(by[p.slot]={n:0,d:0});if(p.slot==='STORY'){if(dayDate(p.week,p.day)<new Date()){b.n++;if(frDone(p)===(p.frames||[]).length)b.d++}return}if(p.status){b.n++;if(p.status==='done')b.d++}});
@@ -467,6 +479,8 @@ document.addEventListener('toggle',e=>{const d=e.target;if(!(d.matches&&d.matche
 document.addEventListener('click',async e=>{
  const go=e.target.closest('[data-go]');if(go){cur=go.dataset.w;sel=+go.dataset.go;setTab('today');return}
  const s=e.target.closest('button[data-s]');if(s){const p=byId(s.dataset.id);if(p)change(p.id,{status:p.status===s.dataset.s?'':s.dataset.s});return}
+ const yt=e.target.closest('button[data-shorts]');if(yt){const p=byId(yt.dataset.shorts);if(p)change(p.id,{shorts:!p.shorts});return}
+ const st=e.target.closest('button[data-setup]');if(st){const k=st.dataset.setup;try{await mutate(d=>{d.setup=d.setup||{};d.setup[k]=!d.setup[k]},'Setup: '+k);status('Saved online ✓','ok')}catch(err){status('Not saved, try again','warn')}return}
  const fb=e.target.closest('button[data-frame]');if(fb){const p=byId(fb.dataset.frame);if(p){const i=+fb.dataset.i;const dn=(p.framesDone||[]).slice();const k=dn.indexOf(i);if(k>=0)dn.splice(k,1);else dn.push(i);dn.sort((a,b)=>a-b);change(p.id,{framesDone:dn,status:dn.length===(p.frames||[]).length?'done':''})}return}
  const f=e.target.closest('button[data-film]');if(f){const p=byId(f.dataset.film);if(p)change(p.id,{status:p.status==='done'?'':'done'});return}
  const sa=e.target.closest('button[data-saveall]');if(sa){saveAll(sa);return}
