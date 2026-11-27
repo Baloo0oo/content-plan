@@ -17,7 +17,7 @@
 <style>
 /* Today-first planner: dark, one day at a time, details on tap. Same app on phone (bottom tabs) and PC (top tabs + week beside today). */
 :root{--bg:#18191b;--card:#222326;--card2:#1d1e21;--ink:#f1f1ef;--mute:#a9a9a4;--line:#34353a;--ok:#2f9e44;--red:#e5483a;--blue:#4a8cf0;
---LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#5f6672;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b;--FILM:#6b7a8c;--STORY:#e1306c;color-scheme:dark}
+--LIFE:#8a63d2;--OWNER:#1f7a8c;--BIOMECH:#d93a2b;--NUTRITION:#2f9e44;--CAROUSEL:#e08a00;--WORKOUT:#5f6672;--TRAINING:#2b6cd9;--REDDIT:#ff4500;--COACHING:#c2185b;--FILM:#6b7a8c;--STORY:#e1306c;--COACHED:#f2b705;color-scheme:dark}
 .story{border:2px solid var(--STORY);border-radius:16px;padding:12px 14px;margin-bottom:10px}
 .story h3{margin:0 0 2px;font-size:17px;font-weight:800}
 .story .fi .ft{font-weight:500}
@@ -146,7 +146,7 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 <button role="tab" data-tab="today" aria-selected="true" id="t-today"><b>●</b>Today</button>
 <button role="tab" data-tab="week" aria-selected="false" id="t-week"><b>▦</b>Week</button>
 <button role="tab" data-tab="car" aria-selected="false" id="t-car"><b>▤</b>Carousels</button>
-<button role="tab" data-tab="scripts" aria-selected="false" id="t-scripts"><b>✎</b>Owners</button>
+<button role="tab" data-tab="scripts" aria-selected="false" id="t-scripts"><b>✎</b>Series</button>
 <button role="tab" data-tab="stats" aria-selected="false" id="t-stats"><b>▲</b>Stats</button>
 </nav>
 <div class="wrap">
@@ -195,7 +195,11 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 </div></section>
 
 <section class="view" id="v-scripts" hidden>
-<p class="mut" style="margin:4px 0 10px">All 24 gym-owner reels, one every Wednesday at 9 PM (9:30 PM in Ramadan). No offer, link, price or DM keyword in any of them.</p>
+<h2 style="margin:6px 0 2px;font-size:20px">Coach's corner → course launch</h2>
+<p class="mut" style="margin:0 0 10px">One reel every Wednesday at 6 PM for coaches and people who want to become coaches. Value first, then teasers from 24 Mar, launch on Wed 14 Apr 2027.</p>
+<div id="coachseries"></div>
+<h2 style="margin:18px 0 2px;font-size:20px">Gym-owner reels</h2>
+<p class="mut" style="margin:0 0 10px">All 24, one every Wednesday at 9 PM (9:30 PM in Ramadan). No offer, link, price or DM keyword in any of them.</p>
 <div id="owners"></div>
 </section>
 
@@ -221,8 +225,8 @@ textarea.inp{min-height:88px;padding:8px 10px;line-height:1.5}
 const API='https://api.github.com/repos/Baloo0oo/content-plan-data/contents/';
 const D=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const DL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const S={LIFE:'Life video',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming',STORY:'Stories'};
-const EFF={LIFE:'Talking video, outside or at home',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker with Claude',NUTRITION:'Low-medium · green screen',CAROUSEL:'Made by the carousel maker',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings'};
+const S={LIFE:'Life video',COACHING:'Coaching',BIOMECH:'Biomech',OWNER:'Owner',NUTRITION:'Nutrition',CAROUSEL:'Carousel',WORKOUT:'Workout',TRAINING:'Training',REDDIT:'Reddit (extra)',FILM:'Filming',STORY:'Stories',COACHED:"Coach's corner"};
+const EFF={LIFE:'Talking video, outside or at home',OWNER:'Low · scripted',BIOMECH:'High · 3–4 h in the video maker with Claude',NUTRITION:'Low-medium · green screen',CAROUSEL:'Made by the carousel maker',WORKOUT:'Low · no edit',TRAINING:'Low-medium · green screen',REDDIT:'Extra · green screen over the post',COACHING:'Medium · screen recordings',COACHED:'Course build-up · talking or biomech graphics'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl=u=>typeof u==='string'&&u.startsWith('https://')?u:'';
 const $=id=>document.getElementById(id);
@@ -297,12 +301,14 @@ const byId=id=>data.posts.find(p=>p.id===id);
 function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
 function kv(k,v){return v?`<div><p class="k">${esc(k)}</p><p>${v}</p></div>`:''}
 function bgBlock(bg){if(!bg||!bg.n)return '';return `<div><p class="k">Green-screen backgrounds (${bg.n})</p><div class="slides bg" data-bg="${esc(bg.key)}" data-n="${bg.n}" data-ext="${esc(bg.ext||'png')}"></div><button class="big" type="button" data-savebg="${esc(bg.key)}|${bg.n}|${esc(bg.ext||'png')}" style="margin-top:6px">Save all backgrounds</button><p class="mut"></p>${(bg.credits||[]).length?`<p class="mut" style="font-size:12px">${bg.credits.map(c=>esc(c)).join('<br>')}</p>`:''}</div>`}
+function ideasBlock(onscreen,ideas){const cards=(onscreen||'').split(' | ').filter(s=>s.trim());if(!ideas||!ideas.length||!cards.length)return '';
+ return `<div><p class="k">Backgrounds: what to search for</p><ol style="margin:4px 0 0;padding-inline-start:20px">${cards.map((c,i)=>`<li style="margin:4px 0"><span dir="rtl">${esc(c)}</span><br><span class="mut">search: “${esc(ideas[i%ideas.length])}”</span></li>`).join('')}</ol><p class="mut" style="margin:4px 0 0">Pick your own photos (Pinterest, Pixabay, your camera roll) and put your on-screen text on top in your editor.</p></div>`}
 function extra(p){if(!p)return '';let h='';
  if(p.onscreen)h+=`<div><p class="k">On screen (one card per line)</p><pre dir="rtl">${esc(p.onscreen.split(' | ').join('\n'))}</pre></div>`;
  if(p.shows)h+=kv('What the video shows',esc(p.shows));
  if(p.source_screen)h+=`<div><p class="k">Source on screen</p><pre dir="rtl">${esc(p.source_screen.split(' | ').join('\n'))}</pre></div>`;
  if(p.source_caption)h+=kv('Source for the caption',esc(p.source_caption));
- h+=bgBlock(p.bg);
+ h+=ideasBlock(p.onscreen,p.bg_ideas);
  return h}
 function postCard(p){
  const car=p.carousel?(data.carousels||[]).find(c=>c.id===p.carousel):null;
@@ -364,7 +370,7 @@ function render(){
  $('hdate').textContent=`${DL[sel]} ${fmt(dayDate(cur,sel))}${td?' · today':''}`;
  const left=ps.filter(p=>!p.status).length,fl=fs.filter(f=>f.status!=='done').length;
  const sc0=storyOf(cur,sel);
- $('htitle').textContent=tab==='scripts'?'Gym-owner reels':tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}${sc0?', stories '+frDone(sc0)+'/'+(sc0.frames||[]).length:''}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
+ $('htitle').textContent=tab==='scripts'?'Series':tab==='today'?`${td?'Today':DL[sel]}: ${ps.length?left+' to post':'no posts'}${sc0?', stories '+frDone(sc0)+'/'+(sc0.frames||[]).length:''}, ${fs.length?fl+' to film':'no filming'}`:tab==='week'?'This week':tab==='car'?'Carousels':'Stats';
  $('strip').innerHTML=D.map((n,d)=>{const p=postsOf(cur,d),f=filmsOf(cur,d);const dots=[];
   if(p.length&&p.every(x=>x.status==='done'))dots.push('var(--ok)');else if(p.some(x=>x.status==='missed'))dots.push('var(--red)');
   if(f.length)dots.push(f.every(x=>x.status==='done')?'var(--ok)':'var(--FILM)');
@@ -381,9 +387,14 @@ function render(){
  agenda(cur,'sideweek');agenda(cur,'week');
  const r=(data.reddit||{})[cur];
  $('redditbox').innerHTML=r?`<div class="reddit"><h3>Reddit this week: ${esc(r.topic)}</h3><p class="mut">${esc(r.sub)} · ${esc(r.comments)} comments${safeUrl(r.url)?` · <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">open the post</a>`:''}</p><p>${esc(r.angle)}</p>${r.backup?`<p class="mut">Backup: ${esc(r.backup)}</p>`:''}</div>`:'';
- renderCars();renderStats();renderOwners();
+ renderCars();renderStats();renderOwners();renderCoachSeries();
  document.querySelectorAll('.slides[data-bg]').forEach(box=>{const d=box.closest('details');if(d&&d.open)loadBg(box)});
  document.querySelectorAll('.slides[data-car]').forEach(box=>{const c=(data.carousels||[]).find(x=>x.id===box.dataset.car);const d=box.closest('details');if(c&&d&&d.open)loadSlides(c,box)});
+}
+function renderCoachSeries(){
+ const list=data.coachSeries||[];const PC={Value:'#2b6cd9',Method:'#2f9e44',Trust:'#8a63d2',Teaser:'#e08a00',Launch:'#e5483a'};
+ $('coachseries').innerHTML=list.map(s=>{const d=new Date(s.date+'T12:00:00');const p=data.posts.find(x=>x.slot==='COACHED'&&new RegExp("^Coach's corner #"+s.n+'\b').test(x.topic||''));
+  return `<div class="card ${p&&p.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${s.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(s.time)}</span><span class="tag" style="--c:${PC[s.phase]||'#5f6672'}">${esc(s.phase)}</span></div><h3>${esc(s.title)}</h3><p class="mut" style="margin:-4px 0 0" dir="rtl">${esc(s.ar)}</p><p class="mut" style="margin:4px 0 0">${esc(s.what)}</p></div>`}).join('');
 }
 function renderOwners(){
  const list=data.ownerScripts||[];const today=new Date();today.setHours(0,0,0,0);
@@ -393,7 +404,7 @@ function renderOwners(){
    +`<div><p class="k">On screen</p><pre dir="rtl">${esc((r.onscreen||'').split(' | ').join('\n'))}</pre><button class="copy" type="button" data-copyo="${r.n}|onscreen">Copy on-screen text</button></div>`
    +kv('Shows',esc(r.shows))+(r.source_screen?kv('Source on screen',`<span dir="rtl">${esc(r.source_screen)}</span>`):'')
    +(r.source_caption?`<div><p class="k">Source for the caption</p><p>${esc(r.source_caption)}</p><button class="copy" type="button" data-copyo="${r.n}|source_caption">Copy source</button></div>`:'')
-   +bgBlock(r.bg)+kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
+   +ideasBlock(r.onscreen,r.bg_ideas)+kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
   return `<div class="card ${pp&&pp.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${r.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(r.time)}</span>${st?`<span class="tag" style="--c:${st==='Posted ✓'?'var(--ok)':'#5f6672'}">${esc(st)}</span>`:''}</div><h3>${esc(r.title)}</h3>${det('o:'+r.n,'Script and details',inner)}</div>`}).join(''):'<p class="mut">No owner scripts.</p>';
 }
 function renderStats(){
