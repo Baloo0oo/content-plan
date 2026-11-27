@@ -301,7 +301,7 @@ const filmsOf=(w,d)=>data.posts.filter(p=>p.week===w&&p.day===d&&p.slot==='FILM'
 const byId=id=>data.posts.find(p=>p.id===id);
 function det(key,label,inner){return `<details class="more" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${esc(label)}</summary><div class="dl">${inner}</div></details>`}
 function kv(k,v){return v?`<div><p class="k">${esc(k)}</p><p>${v}</p></div>`:''}
-function bgBlock(bg){if(!bg||!bg.n)return '';return `<div><p class="k">Green-screen backgrounds (${bg.n})</p><div class="slides bg" data-bg="${esc(bg.key)}" data-n="${bg.n}" data-ext="${esc(bg.ext||'png')}"></div><button class="big" type="button" data-savebg="${esc(bg.key)}|${bg.n}|${esc(bg.ext||'png')}" style="margin-top:6px">Save all backgrounds</button><p class="mut"></p>${(bg.credits||[]).length?`<p class="mut" style="font-size:12px">${bg.credits.map(c=>esc(c)).join('<br>')}</p>`:''}</div>`}
+function bgBlock(bg,label){if(!bg||!bg.n)return '';return `<div><p class="k">${esc(label||'Green-screen backgrounds')} (${bg.n})</p><div class="slides bg" data-bg="${esc(bg.key)}" data-n="${bg.n}" data-ext="${esc(bg.ext||'png')}"></div><button class="big" type="button" data-savebg="${esc(bg.key)}|${bg.n}|${esc(bg.ext||'png')}" style="margin-top:6px">Save all</button><p class="mut"></p>${(bg.credits||[]).length?`<p class="mut" style="font-size:12px">${bg.credits.map(c=>esc(c)).join('<br>')}</p>`:''}</div>`}
 function ideasBlock(onscreen,ideas){const cards=(onscreen||'').split(' | ').filter(s=>s.trim());if(!ideas||!ideas.length||!cards.length)return '';
  return `<div><p class="k">Backgrounds: what to search for</p><ol style="margin:4px 0 0;padding-inline-start:20px">${cards.map((c,i)=>`<li style="margin:4px 0"><span dir="rtl">${esc(c)}</span><br><span class="mut">search: “${esc(ideas[i%ideas.length])}”</span></li>`).join('')}</ol><p class="mut" style="margin:4px 0 0">Pick your own photos (Pinterest, Pixabay, your camera roll) and put your on-screen text on top in your editor.</p></div>`}
 function extra(p){if(!p)return '';let h='';
@@ -409,17 +409,18 @@ function renderOwners(){
    +ideasBlock(r.onscreen,r.bg_ideas)+kv('Notes',esc(r.notes||''))+kv('Module',esc((r.audience?r.audience+' · ':'')+(r.module||'')));
   return `<div class="card ${pp&&pp.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${r.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(r.time)}</span>${st?`<span class="tag" style="--c:${st==='Posted ✓'?'var(--ok)':'#5f6672'}">${esc(st)}</span>`:''}</div><h3>${esc(r.title)}</h3>${det('o:'+r.n,'Script and details',inner)}</div>`}).join(''):'<p class="mut">No owner scripts.</p>';
 }
+const DMTEXT='أهلًا! ده لينك الأونلاين كوتشينج بتاعي 👇\nlinktr.ee/coachmohamedmomen\n\nهتلاقي فيه إزاي بنشتغل: الدايت بيوصلك بالجرامات على ابليكيشن BA10، التمرين متسجل ست بست، وبراجعلك الفورم بالفيديو كل أسبوع.\n\nلو عندك أي سؤال قبل ما تبدأ، ابعتهولي هنا وهرد عليك.';
 const SETUP=[
  ['bio','Bio','«بقولك ليه، مش بس إزاي · بيوميكانيكس · أونلاين كوتشينج ⬇️» + your link'],
  ['pins','Pin 3 posts','Your best Iron physics reel, your best Real result, a Form check'],
- ['highlights','Highlights','Coaching · Results · Form checks · Q&A'],
- ['dm','DM keyword','Comment «كوتش» → automatic DM with the coaching link (Instagram auto-replies or ManyChat)'],
+ ['highlights','Highlights','كوتشينج · نتايج · فورم تشيك · أسئلتكم (covers below)'],
+ ['dm','DM keyword «كوتش»','ManyChat (free): comment «كوتش» on any reel → automatic DM with your link (reply text below)'],
  ['waitlist','Course waitlist form','Needed by Wed 13 Jan (Coach\'s corner #7 starts mentioning it)'],
  ['youtube','YouTube channel for Shorts','Same handle; upload every reel that beats your average'],
  ['tiktok','TikTok','All reels + your full workouts (full workouts live there only)'],
  ['covers','Series covers','One cover style per series name so the grid shows the series'],
 ];
-function renderSetup(){const s=data.setup||{};$('setuplist').innerHTML=SETUP.map(([k,l,h])=>`<div class="fi ${s[k]?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-setup="${k}" aria-checked="${!!s[k]}" aria-label="${esc(l)}">✓</button><span class="ft">${esc(l)}<br><span class="mut" dir="auto" style="font-weight:400">${esc(h)}</span></span></div></div>`).join('')}
+function renderSetup(){const s=data.setup||{};$('setuplist').innerHTML=SETUP.map(([k,l,h])=>`<div class="fi ${s[k]?'done':''}"><div class="fr"><button type="button" class="box" role="checkbox" data-setup="${k}" aria-checked="${!!s[k]}" aria-label="${esc(l)}">✓</button><span class="ft">${esc(l)}<br><span class="mut" dir="auto" style="font-weight:400">${esc(h)}</span></span></div>${k==='highlights'&&data.highlightCovers?det('hl','Highlight covers',bgBlock(data.highlightCovers,'Covers')):''}${k==='dm'?det('dmtext','The DM reply text',`<pre dir="rtl">${esc(DMTEXT)}</pre><button class="copy" type="button" data-copydm="1">Copy</button>`):''}</div>`).join('')}
 function renderTop(){const n=v=>parseInt(String(v||'').replace(/\D/g,''))||0;const L=data.posts.filter(p=>p.status==='done'&&p.slot!=='FILM'&&p.slot!=='STORY').map(p=>({p,sc:n(p.saves)+n(p.shares)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,5);
  $('toplist').innerHTML=L.length?L.map(x=>`<p style="margin:6px 0"><b>${x.sc}</b> · ${esc(x.p.series||S[x.p.slot]||'')} · ${esc(x.p.topic)}</p>`).join(''):'<p class="mut">Fill in saves and shares on posted reels (Details) and your best posts show up here.</p>'}
 function renderStats(){renderSetup();renderTop();
@@ -490,6 +491,7 @@ document.addEventListener('click',async e=>{
  const sb=e.target.closest('button[data-savebg]');if(sb){const [key,n,ext0]=sb.dataset.savebg.split('|');const ext=ext0||'png';const files=[];for(let i=1;i<=+n;i++){const b=blobs['bg:'+key+'/'+i];if(!b){sb.nextElementSibling.textContent='Wait until all the backgrounds have loaded, then tap again.';return}files.push(new File([b],`${key}-bg-${String(i).padStart(2,'0')}.${ext}`,{type:ext==='png'?'image/png':'image/jpeg'}))}shareOrZip(files,key+'-backgrounds',sb.nextElementSibling);return}
  const ca=e.target.closest('button[data-copya]');if(ca){const c=(data.carousels||[]).find(x=>x.id===ca.dataset.copya);try{await navigator.clipboard.writeText((c&&c.alt)||'');ca.textContent='Copied ✓'}catch(err){ca.textContent='Copy failed'}return}
  const co=e.target.closest('button[data-copyo]');if(co){const [n,f]=co.dataset.copyo.split('|');const r=(data.ownerScripts||[]).find(x=>String(x.n)===n);let txt=r?r[f]||'':'';if(f==='onscreen')txt=txt.split(' | ').join('\n');try{await navigator.clipboard.writeText(txt);co.textContent='Copied ✓'}catch(err){co.textContent='Copy failed: select the text instead'}return}
+ const cdm=e.target.closest('button[data-copydm]');if(cdm){try{await navigator.clipboard.writeText(DMTEXT);cdm.textContent='Copied ✓'}catch(err){cdm.textContent='Copy failed'}return}
  const ct=e.target.closest('button[data-copyt]');if(ct){const [sid,i]=ct.dataset.copyt.split('|');const s=byId(sid);const f=s&&s.frames?s.frames[+i]:null;try{await navigator.clipboard.writeText((f&&f.text)||'');ct.textContent='Copied ✓'}catch(err){ct.textContent='Copy failed: select the text instead'}return}
  const cp=e.target.closest('button[data-copyp],button[data-copyc]');if(cp){const txt=cp.dataset.copyp?(byId(cp.dataset.copyp)||{}).script:((data.carousels||[]).find(c=>c.id===cp.dataset.copyc)||{}).caption;try{await navigator.clipboard.writeText(txt||'');cp.textContent='Copied ✓'}catch(err){cp.textContent='Copy failed: select the text instead'}return}
  const ch=e.target.closest('button[data-chg]');if(ch){const id=ch.dataset.chg;const txt=($('chg-'+id).value||'').trim();if(!txt)return;ch.disabled=true;ch.textContent='Sending…';
