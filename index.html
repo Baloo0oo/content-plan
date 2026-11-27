@@ -410,7 +410,7 @@ function renderOwners(){
   return `<div class="card ${pp&&pp.status==='done'?'done':''}"><div class="ct"><span class="time" style="font-size:18px">#${r.n} · ${esc(D[(d.getDay()+6)%7])} ${esc(fmt(d))}, ${esc(r.time)}</span>${st?`<span class="tag" style="--c:${st==='Posted ✓'?'var(--ok)':'#5f6672'}">${esc(st)}</span>`:''}</div><h3>${esc(r.title)}</h3>${det('o:'+r.n,'Script and details',inner)}</div>`}).join(''):'<p class="mut">No owner scripts.</p>';
 }
 const SETUP=[
- ['bio','Bio','«بفهمك التمرين بالبيوميكانيكس · أونلاين كوتشينج · ابدأ معايا ⬇️» + your link'],
+ ['bio','Bio','«بقولك ليه، مش بس إزاي · بيوميكانيكس · أونلاين كوتشينج ⬇️» + your link'],
  ['pins','Pin 3 posts','Your best Iron physics reel, your best Real result, a Form check'],
  ['highlights','Highlights','Coaching · Results · Form checks · Q&A'],
  ['dm','DM keyword','Comment «كوتش» → automatic DM with the coaching link (Instagram auto-replies or ManyChat)'],
